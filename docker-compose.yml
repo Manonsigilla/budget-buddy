@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: banking_app_db
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password_dev  # Dev only !
+      MYSQL_DATABASE: banking_app
+      MYSQL_USER: bank_user
+      MYSQL_PASSWORD: bank_password_dev
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql
+      - mysql_data:/var/lib/mysql
+    networks:
+      - banking_network
+
+  backend:
+    build: ./backend
+    container_name: banking_app_api
+    depends_on:
+      - mysql
+    environment:
+      DB_HOST: mysql
+      DB_USER: bank_user
+      DB_PASSWORD: bank_password_dev
+      DB_NAME: banking_app
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/app
+    networks:
+      - banking_network
+
+  frontend:
+    build: ./frontend
+    container_name: banking_app_ui
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+    networks:
+      - banking_network
+
+volumes:
+  mysql_data:
+
+networks:
+  banking_network:
+    driver: bridge

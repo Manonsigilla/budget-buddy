@@ -1,0 +1,7 @@
+# Ne pas versionner :
+*.db
+database/data/          # Les vraies données
+.env                    # Credentials
+/venv/
+/node_modules/
+*.log
