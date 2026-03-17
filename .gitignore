@@ -5,3 +5,9 @@ database/data/          # Les vraies données
 /venv/
 /node_modules/
 *.log
+
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
