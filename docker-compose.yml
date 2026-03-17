@@ -36,14 +36,15 @@ services:
       - banking_network
 
   frontend:
-    build: ./frontend
-    container_name: banking_app_ui
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./frontend:/app
-    networks:
-      - banking_network
+      build: ./frontend
+      container_name: banking_app_ui
+      ports:
+        - "3000:3000"
+      volumes:
+        - ./frontend:/app
+        - /app/node_modules  # <-- LA LIGNE MAGIQUE EST ICI
+      networks:
+        - banking_network
 
 volumes:
   mysql_data:
