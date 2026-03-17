@@ -1,42 +1,22 @@
 #  entry point flask
 
 # backend/app.py
-from flask import Flask, request, jsonify
+from flask import Flask
 from flask_cors import CORS
-from datetime import datetime
-import jwt
+from flask_jwt_extended import JWTManager
+from routes.health import health_bp
+from routes.auth import auth_bp
 
 app = Flask(__name__)
 CORS(app)
 
 app.config['SECRET_KEY'] = 'dev-secret-key'  # À mettre dans .env !
+app.config['JWT_SECRET_KEY'] = 'dev-jwt-secret-key'  # À mettre dans .env !
 
-@app.route('/health', methods=['GET'])
-def health():
-    return {
-        "status": "ok",
-        "timestamp": datetime.now().isoformat()
-    }, 200
+JWTManager(app)
 
-@app.route('/auth/register', methods=['POST'])
-def register():
-    """À implémenter avec validation + hash"""
-    data = request.json
-    # Validation
-    # Hash password
-    # Insert en DB
-    return {"message": "User created"}, 201
-
-@app.route('/auth/login', methods=['POST'])
-def login():
-    """À implémenter avec vérification password + JWT"""
-    data = request.json
-    # Vérifier credentials
-    # Générer JWT token
-    return {
-        "token": "jwt_token_here",
-        "user": {"id": 1, "username": "..."}
-    }, 200
+app.register_blueprint(health_bp)
+app.register_blueprint(auth_bp)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
