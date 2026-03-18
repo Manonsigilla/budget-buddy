@@ -83,6 +83,112 @@ curl -X POST http://localhost:5001/auth/login \
 
 ---
 
+## 🔐 Sécurité des mots de passe
+
+Les mots de passe ne sont **jamais stockés en clair** dans la base de données. On utilise trois mécanismes combinés :
+
+### 1. Hashage (hashlib)
+
+Le mot de passe est transformé en une chaîne illisible grâce à `pbkdf2_hmac` (SHA-256). C'est une fonction à **sens unique** — impossible de retrouver le mot de passe original à partir du hash.
+
+```
+"motdepasse" → "a3f8c2d9e1b7..." (stocké en DB)
+```
+
+### 2. Sel (`os.urandom(32)`)
+
+Une valeur aléatoire unique est générée à chaque inscription et ajoutée au mot de passe avant de le hacher. Résultat : deux utilisateurs avec le même mot de passe auront des hashs **différents** en base de données.
+
+```
+"motdepasse" + sel_aléatoire_1 → "a3f8c2d9..."
+"motdepasse" + sel_aléatoire_2 → "x9k2m7p1..."  ← hash différent !
+```
+
+Le sel est stocké en base de données avec le hash (format `sel:hash`).
+
+### 3. Poivre (`PASSWORD_PEPPER`)
+
+Une valeur secrète fixe stockée dans les **variables d'environnement Docker** — jamais en base de données. Si un hacker vole la base de données MySQL, il a les sels mais pas le poivre → il ne peut pas reconstruire les hashs.
+
+```
+"motdepasse" + poivre → + sel → hash final
+```
+
+### En résumé
+
+```python
+# Inscription
+peppered = password + PEPPER          # ajout du poivre
+salt = os.urandom(32)                 # sel aléatoire unique
+key = hashlib.pbkdf2_hmac(...)        # hashage SHA-256
+stocké en DB → "salt_hex:key_hex"
+
+# Connexion
+# on relit le sel depuis la DB
+# on refait le même calcul avec le poivre
+# on compare les deux hashs
+```
+
+---
+
+## 🛠️ Commandes utiles
+
+### Docker
+
+```bash
+# Lancer le projet (première fois ou après un changement de code)
+docker compose up --build
+
+# Lancer le projet (sans rebuild)
+docker compose up
+
+# Arrêter le projet
+docker compose down
+
+# Arrêter et supprimer les données MySQL (repart de zéro)
+docker compose down -v
+
+# Voir les logs en temps réel
+docker compose logs -f
+
+# Voir les logs d'un seul conteneur
+docker compose logs -f backend
+docker compose logs -f mysql
+docker compose logs -f frontend
+```
+
+### Base de données
+
+```bash
+# Ouvrir MySQL dans le terminal
+docker exec -it banking_app_db mysql -u bank_user -pbank_password_dev banking_app
+
+# Voir tous les utilisateurs
+docker exec -it banking_app_db mysql -u bank_user -pbank_password_dev banking_app -e "SELECT id, username, email, balance FROM users;"
+
+# Voir tous les virements
+docker exec -it banking_app_db mysql -u bank_user -pbank_password_dev banking_app -e "SELECT * FROM virements;"
+```
+
+### Tester l'API
+
+```bash
+# Vérifier que l'API tourne
+curl http://localhost:5001/health
+
+# Créer un compte
+curl -X POST http://localhost:5001/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"username": "alice", "email": "alice@test.com", "password": "motdepasse", "first_name": "Alice", "last_name": "Dupont"}'
+
+# Se connecter
+curl -X POST http://localhost:5001/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "alice@test.com", "password": "motdepasse"}'
+```
+
+---
+
 ## 🗃️ Base de données
 
 Tables MySQL disponibles :
