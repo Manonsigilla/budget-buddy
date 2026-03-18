@@ -28,6 +28,7 @@ services:
       DB_USER: bank_user
       DB_PASSWORD: bank_password_dev
       DB_NAME: banking_app
+      PASSWORD_PEPPER: super_secret_pepper_dev
     ports:
       - "5001:5000"
     volumes:
