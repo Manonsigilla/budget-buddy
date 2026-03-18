@@ -1,18 +1,20 @@
 import { useState } from 'react';
-import api from '../api';
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const { login } = useAuth();  // Utilise le contexte
+    const navigate = useNavigate();
 
     const handleLogin = async () => {
         try {
-            const response = await api.post('/auth/login', { email, password });
-            console.log('Login réussi:', response.data);
-        // Stocke le token (ex: localStorage.setItem('token', response.data.token))
-        // Redirige vers le dashboard
+            await login(email, password);  // Appelle login du contexte (qui stocke le token et met à jour user)
+            navigate('/dashboard');  // Redirige après succès
         } catch (error) {
             console.error('Erreur login:', error);
+            alert('Erreur de connexion');  // Ajoute un feedback utilisateur
         }
     };
 
