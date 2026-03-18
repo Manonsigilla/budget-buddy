@@ -1,4 +1,3 @@
-version: '3.8'
 
 services:
   mysql:
@@ -14,6 +13,9 @@ services:
     volumes:
       - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
       - ./database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql
+      - ./database/migrations/001_create_tables.sql:/docker-entrypoint-initdb.d/03-migration-001.sql
+      - ./database/migrations/002_add_notifications.sql:/docker-entrypoint-initdb.d/04-migration-002.sql
+      - ./database/migrations/003_add_categories.sql:/docker-entrypoint-initdb.d/05-migration-003.sql
       - mysql_data:/var/lib/mysql
     networks:
       - banking_network
