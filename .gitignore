@@ -5,13 +5,8 @@ database/data/          # Les vraies données
 /venv/
 /node_modules/
 *.log
-<<<<<<< HEAD
-__pycache__
-=======
-
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 .Python
->>>>>>> b8cc24393ea2162c0d472648ab93e8db88ea2899
