@@ -1,0 +1,8 @@
+# React
+npm install react react-dom
+
+# Vite
+npm install vite
+
+# Axios
+npm install axios

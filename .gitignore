@@ -1,12 +1,31 @@
-# Ne pas versionner :
 *.db
-database/data/          # Les vraies données
-.env                    # Credentials
-/venv/
-/node_modules/
+database/data/
+.env
 *.log
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 .Python
+
+# --- Python venv ---
+venv/
+.venv/
+backend/venv/
+backend/.venv/
+
+# --- Node / Frontend ---
+node_modules/
+frontend/node_modules/
+
+# Build Vite / caches
+frontend/dist/
+frontend/.vite/
+
+# cache TypeScript
+frontend/tsconfig.tsbuildinfo
+
+# --- IDE / OS ---
+.vscode/
+.idea/
+.DS_Store
