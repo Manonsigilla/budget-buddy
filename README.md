@@ -65,6 +65,11 @@ budget-buddy/
 | POST | `/auth/register` | Créer un compte |
 | POST | `/auth/login` | Se connecter, reçoit un token JWT |
 
+#### Règles de validation
+- Tous les champs sont requis : `username`, `email`, `password`, `first_name`, `last_name`
+- Email doit être au format valide (ex: `alice@test.com`)
+- Mot de passe minimum **8 caractères**
+
 ### Exemples
 
 **Register :**
@@ -85,7 +90,7 @@ curl -X POST http://localhost:5001/auth/login \
 
 ## 🔐 Sécurité des mots de passe
 
-Les mots de passe ne sont **jamais stockés en clair** dans la base de données. On utilise trois mécanismes combinés :
+Les mots de passe ne sont **jamais stockés en clair** dans la base de données. On utilise trois mécanismes combinés avec la librairie Python intégrée `hashlib` :
 
 ### 1. Hashage (hashlib)
 
@@ -128,6 +133,22 @@ stocké en DB → "salt_hex:key_hex"
 # on refait le même calcul avec le poivre
 # on compare les deux hashs
 ```
+
+---
+
+## 🔑 Variables d'environnement
+
+Toutes les valeurs sensibles sont dans le `docker-compose.yml` sous forme de variables d'environnement — jamais dans le code source.
+
+| Variable | Description |
+|----------|-------------|
+| `DB_HOST` | Hôte MySQL |
+| `DB_USER` | Utilisateur MySQL |
+| `DB_PASSWORD` | Mot de passe MySQL |
+| `DB_NAME` | Nom de la base de données |
+| `PASSWORD_PEPPER` | Poivre pour le hashage des mots de passe |
+| `SECRET_KEY` | Clé secrète Flask |
+| `JWT_SECRET_KEY` | Clé secrète pour les tokens JWT |
 
 ---
 
