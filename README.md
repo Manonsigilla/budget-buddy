@@ -213,6 +213,7 @@ curl -X POST http://localhost:5001/auth/login \
 ## 🗃️ Base de données
 
 Tables MySQL disponibles :
+
 - `users` — comptes utilisateurs
 - `categories` — catégories de virements
 - `virements` — historique des transactions
@@ -221,8 +222,15 @@ Tables MySQL disponibles :
 
 ---
 
+## Frontend React/TypeScript :
+
+- AuthContext : gestion de l'état d'authentification
+- Login : formulaire de connexion
+- Register : formulaire d'inscription
+- API intégrée avec le backend Flask pour l'inscription et la connexion
+
 ## 👥 Équipe
 
-- Frontend: Toi
-- Backend: Collègue #1
-- Database: Collègue #2
+- Frontend: Manon
+- Backend: Louis
+- Database: Angie
