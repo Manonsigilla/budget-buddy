@@ -53,43 +53,48 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [token, setToken] = useState<string | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     // Au montage : charger token depuis localStorage
     useEffect(() => {
         const savedToken = localStorage.getItem('authToken');
-        if (savedToken) {
-        setToken(savedToken);
-        // Ajouter le token au header par défaut d'axios
-        api.defaults.headers.common['Authorization'] = `Bearer ${savedToken}`;
+        const savedUser = localStorage.getItem('user');
+
+        if (savedToken && savedUser) {
+            try {
+                setToken(savedToken);
+                setUser(JSON.parse(savedUser));
+                api.defaults.headers.common['Authorization'] = `Bearer ${savedToken}`;
+            } catch (err) {
+                // Si parsing échoue, nettoyer
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('user');
+            }
         }
+        setIsLoading(false);
     }, []);
 
     const login = async (data: LoginData) => {
         setIsLoading(true);
         setError(null);
         try {
-        const response = await api.post('/auth/login', data);
-        const { user: userData, token: authToken } = response.data;
-
-        // définir le token
-        setToken(authToken);
-        // Ajouter le token au header par défaut d'axios
-        api.defaults.headers.common['Authorization'] = `Bearer ${authToken}`;
-        
-        // Récupérer les infos complètes de l'utilisateur (avec balance)
-        const userResponse = await api.get(`/users/${userData.id}`);
-        setUser(userResponse.data);
-        
-        // Sauvegarder le token
-        localStorage.setItem('authToken', authToken);
+            const response = await api.post('/auth/login', data);
+            const { user: userData, token: authToken } = response.data;
+            
+            setToken(authToken);
+            api.defaults.headers.common['Authorization'] = `Bearer ${authToken}`;
+            
+            setUser(userData);
+            
+            localStorage.setItem('authToken', authToken);
+            localStorage.setItem('user', JSON.stringify(userData));
         } catch (err: any) {
-        const errorMessage = err.response?.data?.message || 'Erreur de connexion';
-        setError(errorMessage);
-        throw err;
+            const errorMessage = err.response?.data?.message || 'Erreur de connexion';
+            setError(errorMessage);
+            throw err;
         } finally {
-        setIsLoading(false);
+            setIsLoading(false);
         }
     };
 
@@ -114,6 +119,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(null);
         setToken(null);
         localStorage.removeItem('authToken');
+        localStorage.removeItem('user');
         delete api.defaults.headers.common['Authorization'];
     };
 

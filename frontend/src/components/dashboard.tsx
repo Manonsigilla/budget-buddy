@@ -1,19 +1,34 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTransfers } from '../hooks/useTransfers';
 import { useCreateTransfer } from '../hooks/useCreateTransfer';
+import api from '../api';
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
   const { transfers, isLoading: transfersLoading, error: transfersError } = useTransfers();
   const { createTransfer, isLoading: transferCreating, error: createError, success: createSuccess, resetMessages } = useCreateTransfer();
 
+  const [currentUser, setCurrentUser] = useState(user);
   const [showTransferForm, setShowTransferForm] = useState(false);
   const [formData, setFormData] = useState({
     receiver_id: '',
     amount: '',
     description: '',
   });
+
+  useEffect(() => {
+    // Récupère les infos actualisées de l'utilisateur
+    const fetchUser = async () => {
+      try {
+        const response = await api.get('/users/me');
+        setCurrentUser(response.data);
+      } catch (err) {
+        console.error('Erreur récupération utilisateur:', err);
+      }
+    };
+    fetchUser();
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -46,8 +61,8 @@ export default function Dashboard() {
     }
   };
 
-  if (!user) {
-    return <div style={{ padding: '20px' }}>Chargement des informations utilisateur...</div>;
+  if (!user || !currentUser) {
+    return <div style={{ padding: '20px' }}>Chargement...</div>;
   }
 
   return (
@@ -69,7 +84,6 @@ export default function Dashboard() {
         </button>
       </div>
 
-      {/* Section Profil Utilisateur */}
       <div style={{
         backgroundColor: '#f8f9fa',
         padding: '20px',
@@ -81,20 +95,19 @@ export default function Dashboard() {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginTop: '15px' }}>
           <div>
             <p style={{ color: '#666', fontSize: '14px' }}>Nom</p>
-            <p style={{ fontSize: '18px', fontWeight: 'bold' }}>{user.first_name} {user.last_name}</p>
+            <p style={{ fontSize: '18px', fontWeight: 'bold' }}>{currentUser.first_name} {currentUser.last_name}</p>
           </div>
           <div>
             <p style={{ color: '#666', fontSize: '14px' }}>Email</p>
-            <p style={{ fontSize: '18px' }}>{user.email}</p>
+            <p style={{ fontSize: '18px' }}>{currentUser.email}</p>
           </div>
           <div>
             <p style={{ color: '#666', fontSize: '14px' }}>Identifiant</p>
-            <p style={{ fontSize: '18px' }}>{user.username}</p>
+            <p style={{ fontSize: '18px' }}>{currentUser.username}</p>
           </div>
         </div>
       </div>
 
-      {/* Section Solde */}
       <div style={{
         backgroundColor: '#28a745',
         color: 'white',
@@ -104,10 +117,9 @@ export default function Dashboard() {
         textAlign: 'center',
       }}>
         <p style={{ fontSize: '16px', marginBottom: '10px' }}>Solde disponible</p>
-        <h2 style={{ fontSize: '36px', margin: 0 }}>{user.balance.toFixed(2)} EUR</h2>
+        <h2 style={{ fontSize: '36px', margin: 0 }}>{currentUser.balance.toFixed(2)} EUR</h2>
       </div>
 
-      {/* Section Créer un virement */}
       <div style={{
         backgroundColor: '#f8f9fa',
         padding: '20px',
@@ -179,9 +191,6 @@ export default function Dashboard() {
                 required
                 disabled={transferCreating}
               />
-              <p style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>
-                L'identifiant numérique de l'utilisateur destinataire
-              </p>
             </div>
 
             <div style={{ marginBottom: '15px' }}>
@@ -245,7 +254,6 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* Section Virements */}
       <div style={{
         backgroundColor: '#f8f9fa',
         padding: '20px',
@@ -290,10 +298,10 @@ export default function Dashboard() {
                   <td style={{ padding: '10px' }}>{transfer.id}</td>
                   <td style={{ padding: '10px' }}>
                     <span style={{
-                      color: transfer.sender_id === user.id ? '#dc3545' : '#28a745',
+                      color: transfer.sender_id === currentUser.id ? '#dc3545' : '#28a745',
                       fontWeight: 'bold'
                     }}>
-                      {transfer.sender_id === user.id ? '-' : '+'}{transfer.amount.toFixed(2)} EUR
+                      {transfer.sender_id === currentUser.id ? '-' : '+'}{transfer.amount.toFixed(2)} EUR
                     </span>
                   </td>
                   <td style={{ padding: '10px' }}>
