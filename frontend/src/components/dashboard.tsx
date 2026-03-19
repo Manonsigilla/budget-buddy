@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTransfers } from '../hooks/useTransfers';
 import { useCreateTransfer } from '../hooks/useCreateTransfer';
+import { useUsers } from '../hooks/useUsers';
 import api from '../api';
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
   const { transfers, isLoading: transfersLoading, error: transfersError } = useTransfers();
   const { createTransfer, isLoading: transferCreating, error: createError, success: createSuccess, resetMessages } = useCreateTransfer();
+  const { users } = useUsers();
 
   const [currentUser, setCurrentUser] = useState(user);
   const [showTransferForm, setShowTransferForm] = useState(false);
@@ -174,23 +176,31 @@ export default function Dashboard() {
 
             <div style={{ marginBottom: '15px' }}>
               <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-                ID du destinataire
+                Destinataire
               </label>
-              <input
-                type="number"
+              <select
                 name="receiver_id"
                 value={formData.receiver_id}
                 onChange={handleFormChange}
-                placeholder="Ex: 2"
                 style={{
-                  width: '100%',
-                  padding: '10px',
-                  border: '1px solid #ddd',
-                  borderRadius: '4px',
+                width: '100%',
+                padding: '10px',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                fontSize: '16px',
                 }}
                 required
                 disabled={transferCreating}
-              />
+              >
+                <option value="">Sélectionne un destinataire</option>
+                {users
+                    .filter(u => u.id !== currentUser.id)
+                    .map(user => (
+                        <option key={user.id} value=    {user.id}>
+                            {user.first_name} {user.last_name} ({user.email})
+                        </option>
+                    ))}
+                </select>
             </div>
 
             <div style={{ marginBottom: '15px' }}>

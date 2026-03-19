@@ -4,7 +4,7 @@
 import re
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models.user import find_user_by_id, find_user_by_email, update_user, update_password
+from models.user import find_user_by_id, find_user_by_email, update_user, update_password, find_all_users
 
 users_bp = Blueprint('users', __name__)
 
@@ -90,3 +90,19 @@ def change_password():
         return jsonify({"error": "Ancien mot de passe incorrect"}), 401
 
     return jsonify({"message": "Mot de passe mis à jour avec succès"}), 200
+
+@users_bp.route('/users', methods=['GET'])
+def get_all_users():
+    """
+    Retourne la liste de tous les utilisateurs.
+    """
+    users = find_all_users()  # Utilise une fonction de la DB
+    
+    return jsonify([{
+        "id": user['id'],
+        "username": user['username'],
+        "email": user['email'],
+        "first_name": user['first_name'],
+        "last_name": user['last_name'],
+        "balance": float(user['balance'])
+    } for user in users]), 200

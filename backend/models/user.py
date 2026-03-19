@@ -135,3 +135,15 @@ def create_user(username, email, password, first_name, last_name):
     cursor.close()
     db.close()
     return user_id
+
+def find_all_users():
+    """Retourne une liste de tous les utilisateurs (sans les mots de passe)."""
+    db = get_db_connection()
+    if not db:
+        return []
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("SELECT id, username, email, first_name, last_name, balance FROM users")
+    users = cursor.fetchall()
+    cursor.close()
+    db.close()
+    return users
