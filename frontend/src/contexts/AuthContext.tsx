@@ -8,7 +8,7 @@ interface User {
     email: string;
     first_name: string;
     last_name: string;
-    balance?: number;
+    balance: number;
 }
 
 interface LoginData {
@@ -35,6 +35,17 @@ interface AuthContextType {
     error: string | null;
 }
 
+interface Transfer {
+    id: number;
+    sender_id: number;
+    receiver_id: number;
+    amount: number;
+    description?: string;
+    status: string;
+    created_at: string;
+    category_id?: number;
+}
+
 // Créer le contexte
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -42,39 +53,48 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [token, setToken] = useState<string | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     // Au montage : charger token depuis localStorage
     useEffect(() => {
         const savedToken = localStorage.getItem('authToken');
-        if (savedToken) {
-        setToken(savedToken);
-        // Ajouter le token au header par défaut d'axios
-        api.defaults.headers.common['Authorization'] = `Bearer ${savedToken}`;
+        const savedUser = localStorage.getItem('user');
+
+        if (savedToken && savedUser) {
+            try {
+                setToken(savedToken);
+                setUser(JSON.parse(savedUser));
+                api.defaults.headers.common['Authorization'] = `Bearer ${savedToken}`;
+            } catch (err) {
+                // Si parsing échoue, nettoyer
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('user');
+            }
         }
+        setIsLoading(false);
     }, []);
 
     const login = async (data: LoginData) => {
         setIsLoading(true);
         setError(null);
         try {
-        const response = await api.post('/auth/login', data);
-        const { user: userData, token: authToken } = response.data;
-        
-        setUser(userData);
-        setToken(authToken);
-        
-        // Sauvegarder le token
-        localStorage.setItem('authToken', authToken);
-        // Ajouter au header axios
-        api.defaults.headers.common['Authorization'] = `Bearer ${authToken}`;
+            const response = await api.post('/auth/login', data);
+            const { user: userData, token: authToken } = response.data;
+            
+            setToken(authToken);
+            api.defaults.headers.common['Authorization'] = `Bearer ${authToken}`;
+            
+            setUser(userData);
+            
+            localStorage.setItem('authToken', authToken);
+            localStorage.setItem('user', JSON.stringify(userData));
         } catch (err: any) {
-        const errorMessage = err.response?.data?.message || 'Erreur de connexion';
-        setError(errorMessage);
-        throw err;
+            const errorMessage = err.response?.data?.message || 'Erreur de connexion';
+            setError(errorMessage);
+            throw err;
         } finally {
-        setIsLoading(false);
+            setIsLoading(false);
         }
     };
 
@@ -99,6 +119,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(null);
         setToken(null);
         localStorage.removeItem('authToken');
+        localStorage.removeItem('user');
         delete api.defaults.headers.common['Authorization'];
     };
 
