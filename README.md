@@ -40,7 +40,8 @@ budget-buddy/
 │   │   └── user.py         ← Fonctions liées aux utilisateurs (DB)
 │   ├── routes/
 │   │   ├── health.py       ← GET /health
-│   │   └── auth.py         ← POST /auth/register, POST /auth/login
+│   │   ├── auth.py         ← POST /auth/register, POST /auth/login
+│   │   └── users.py        ← GET/PUT /users/me, PUT /users/me/password
 │   └── utils/
 │       └── db.py           ← Connexion MySQL
 ├── frontend/               ← React/TypeScript (en cours)
@@ -70,8 +71,6 @@ budget-buddy/
 - Email doit être au format valide (ex: `alice@test.com`)
 - Mot de passe minimum **8 caractères**
 
-### Exemples
-
 **Register :**
 ```bash
 curl -X POST http://localhost:5001/auth/register \
@@ -84,6 +83,38 @@ curl -X POST http://localhost:5001/auth/register \
 curl -X POST http://localhost:5001/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email": "alice@test.com", "password": "motdepasse"}'
+```
+
+### Utilisateurs (protégé par JWT)
+
+> Toutes ces routes nécessitent le header : `Authorization: Bearer <token>`
+
+| Méthode | Route | Description |
+|---------|-------|-------------|
+| GET | `/users/me` | Récupérer son profil et son solde |
+| PUT | `/users/me` | Modifier son profil (nom, email, username) |
+| PUT | `/users/me/password` | Changer son mot de passe |
+
+**Récupérer son profil :**
+```bash
+curl -H "Authorization: Bearer TON_TOKEN" \
+  http://localhost:5001/users/me
+```
+
+**Modifier son profil :**
+```bash
+curl -X PUT http://localhost:5001/users/me \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TON_TOKEN" \
+  -d '{"first_name": "Louis", "last_name": "Martin"}'
+```
+
+**Changer son mot de passe :**
+```bash
+curl -X PUT http://localhost:5001/users/me/password \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TON_TOKEN" \
+  -d '{"old_password": "ancien123", "new_password": "nouveau123"}'
 ```
 
 ---
