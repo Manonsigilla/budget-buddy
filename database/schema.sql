@@ -1,5 +1,15 @@
 -- database/schema.sql
+-- Schéma principal de la base de données Banking App (Budget Buddy)
+-- Exécuté automatiquement au premier démarrage du conteneur MySQL
+
 SET FOREIGN_KEY_CHECKS=0;
+
+-- Table de suivi des migrations appliquées
+CREATE TABLE IF NOT EXISTS schema_migrations (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    migration_name VARCHAR(255) NOT NULL UNIQUE,
+    applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
 CREATE TABLE IF NOT EXISTS users (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -13,7 +23,8 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     is_active BOOLEAN DEFAULT TRUE,
     INDEX idx_email (email),
-    INDEX idx_username (username)
+    INDEX idx_username (username),
+    CONSTRAINT chk_balance_positive CHECK (balance >= 0)
 );
 
 CREATE TABLE IF NOT EXISTS categories (
@@ -42,7 +53,9 @@ CREATE TABLE IF NOT EXISTS virements (
     INDEX idx_sender (sender_id),
     INDEX idx_receiver (receiver_id),
     INDEX idx_created_at (created_at),
-    INDEX idx_status (status)
+    INDEX idx_status (status),
+    CONSTRAINT chk_amount_positive CHECK (amount > 0),
+    CONSTRAINT chk_sender_not_receiver CHECK (sender_id != receiver_id)
 );
 
 CREATE TABLE IF NOT EXISTS notifications (
@@ -72,7 +85,14 @@ CREATE TABLE IF NOT EXISTS audit_logs (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
     INDEX idx_user_id (user_id),
+    INDEX idx_action (action),
     INDEX idx_created_at (created_at)
 );
 
 SET FOREIGN_KEY_CHECKS=1;
+
+-- Enregistrement des migrations initiales
+INSERT IGNORE INTO schema_migrations (migration_name) VALUES
+('001_create_tables'),
+('002_add_notifications'),
+('003_add_categories');
