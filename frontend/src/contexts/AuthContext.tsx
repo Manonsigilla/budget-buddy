@@ -8,7 +8,7 @@ interface User {
     email: string;
     first_name: string;
     last_name: string;
-    balance?: number;
+    balance: number;
 }
 
 interface LoginData {
@@ -33,6 +33,17 @@ interface AuthContextType {
     register(data: RegisterData): Promise<void>;
     logout(): void;
     error: string | null;
+}
+
+interface Transfer {
+    id: number;
+    sender_id: number;
+    receiver_id: number;
+    amount: number;
+    description?: string;
+    status: string;
+    created_at: string;
+    category_id?: number;
 }
 
 // Créer le contexte
@@ -61,14 +72,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
         const response = await api.post('/auth/login', data);
         const { user: userData, token: authToken } = response.data;
-        
-        setUser(userData);
+
+        // définir le token
         setToken(authToken);
+        // Ajouter le token au header par défaut d'axios
+        api.defaults.headers.common['Authorization'] = `Bearer ${authToken}`;
+        
+        // Récupérer les infos complètes de l'utilisateur (avec balance)
+        const userResponse = await api.get(`/users/${userData.id}`);
+        setUser(userResponse.data);
         
         // Sauvegarder le token
         localStorage.setItem('authToken', authToken);
-        // Ajouter au header axios
-        api.defaults.headers.common['Authorization'] = `Bearer ${authToken}`;
         } catch (err: any) {
         const errorMessage = err.response?.data?.message || 'Erreur de connexion';
         setError(errorMessage);
