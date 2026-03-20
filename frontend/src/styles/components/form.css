@@ -24,8 +24,8 @@ select {
     border: 2px solid var(--current-border-color);
     border-radius: var(--radius-md);
     transition: all var(--transition-base);
-    backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
+    backdrop-filter: blur(5px);
 }
 
 input:hover,

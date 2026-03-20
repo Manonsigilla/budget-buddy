@@ -15,8 +15,8 @@
 /* ========== CARTE GLASSMORPHISME ========== */
 .card-glass {
     background: rgba(var(--current-bg-secondary-rgb), 0.7);
-    backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
     border: 1px solid rgba(var(--primary-accent-rgb), 0.2);
     box-shadow: 0 8px 32px 0 rgba(var(--current-shadow-color), 0.1);
 }
