@@ -10,18 +10,19 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [theme, setTheme] = useState<Theme>('light');
-    const [mounted, setMounted] = useState(false);
+    const [theme, setTheme] = useState<Theme>(() => {
+        const savedTheme = localStorage.getItem('theme') as Theme | null;
+        if (savedTheme) return savedTheme;
+        // fallback to matchMedia only if window is defined (safe for SSR although this is Vite)
+        if (typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            return 'dark';
+        }
+        return 'light';
+    });
 
     useEffect(() => {
-        const savedTheme = localStorage.getItem('theme') as Theme | null;
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-        const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
-        setTheme(initialTheme);
-        applyTheme(initialTheme);
-        setMounted(true);
-    }, []);
+        applyTheme(theme);
+    }, [theme]);
 
     const applyTheme = (newTheme: Theme) => {
         document.documentElement.setAttribute('data-theme', newTheme);
@@ -35,10 +36,6 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             return newTheme;
         });
     };
-
-    if (!mounted) {
-        return <>{children}</>;
-    }
 
     return (
         <ThemeContext.Provider value={{ theme, toggleTheme }}>
