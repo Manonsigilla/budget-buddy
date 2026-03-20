@@ -19,6 +19,7 @@ docker compose down -v && docker compose up --build
 - Database: localhost:3307 (user: bank_user)
 
 ### Vérification
+
 ```bash
 curl http://localhost:5001/health
 ```
@@ -244,6 +245,7 @@ curl -X POST http://localhost:5001/auth/login \
 ## 🗃️ Base de données
 
 Tables MySQL disponibles :
+
 - `users` — comptes utilisateurs
 - `categories` — catégories de virements
 - `virements` — historique des transactions
@@ -252,8 +254,41 @@ Tables MySQL disponibles :
 
 ---
 
+## Frontend React/TypeScript
+
+### Étape 1 - Authentification (Terminée)
+- AuthContext : gestion de l'état d'authentification global avec persistance localStorage
+- Login : formulaire de connexion avec validation des champs
+- Register : formulaire d'inscription avec validation (8 caractères minimum, email valide)
+- API intégrée avec le backend Flask pour l'inscription et la connexion
+- Persistance du token JWT et données utilisateur en localStorage
+- Protection des routes avec PrivateRoute (affiche loader pendant restauration)
+- Restauration automatique de la session au rechargement de la page
+
+### Étape 2 - Dashboard (Terminée)
+- Dashboard : affichage des informations utilisateur (nom, email, username)
+- Solde disponible avec formatage en EUR
+- Historique des virements avec tableau (ID, montant, statut, date, description)
+- Récupération des infos utilisateur actualisées via GET /users/me
+- Hook personnalisé useTransfers pour la gestion des virements (GET /transfers)
+- Hook personnalisé useCreateTransfer pour créer un virement (POST /transfers)
+- Hook personnalisé useUsers pour récupérer la liste des utilisateurs (GET /users)
+- Formulaire de virement avec liste déroulante des destinataires (affiche nom, prénom, username, email)
+- Distinction visuelle des montants entrants (+) et sortants (-) par couleur
+- Indicateurs de statut des virements (completed, pending)
+- Bouton de déconnexion avec nettoyage complet (token et user)
+
+### Modifications Backend requises (effectuées)
+- Ajout de l'endpoint GET /users dans backend/routes/users.py
+- Enregistrement du blueprint users_bp dans backend/app.py
+- Export de la fonction find_all_users dans backend/models/user.py
+
+### Points en attente
+- Endpoint POST /transfers nécessite l'enregistrement du blueprint transfers_bp dans backend/app.py
+- À compléter par Louis (backend) et Angie (database)
+
 ## 👥 Équipe
 
-- Frontend: Toi
-- Backend: Collègue #1
-- Database: Collègue #2
+- Frontend: Manon
+- Backend: Louis
+- Database: Angie

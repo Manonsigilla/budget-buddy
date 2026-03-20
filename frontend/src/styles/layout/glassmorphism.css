@@ -1,0 +1,50 @@
+/* ========== GLASSMORPHISME ========== */
+.glass {
+    background: rgba(var(--current-bg-secondary-rgb), 0.6);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(var(--primary-accent-rgb), 0.2);
+    border-radius: var(--radius-lg);
+}
+
+.glass-light {
+    background: rgba(255, 255, 255, 0.1);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-dark {
+    background: rgba(0, 0, 0, 0.1);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.glass-card {
+    background: rgba(var(--current-bg-secondary-rgb), 0.7);
+    -webkit-backdrop-filter: blur(15px);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(var(--primary-accent-rgb), 0.25);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: 0 8px 32px 0 rgba(var(--current-shadow-color), 0.2);
+}
+
+.glass-button {
+    background: rgba(var(--primary-accent-rgb), 0.8);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(var(--primary-accent-rgb), 0.4);
+    color: white;
+    transition: all var(--transition-base);
+}
+
+.glass-button:hover {
+    background: rgba(var(--primary-accent-rgb), 0.9);
+    box-shadow: 0 8px 16px rgba(var(--primary-accent-rgb), 0.3);
+}
+
+.glass-button:active {
+    transform: scale(0.98);
+}
