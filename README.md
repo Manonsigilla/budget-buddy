@@ -38,11 +38,13 @@ budget-buddy/
 │   ├── requirements.txt    ← Dépendances Python
 │   ├── Dockerfile
 │   ├── models/
-│   │   └── user.py         ← Fonctions liées aux utilisateurs (DB)
+│   │   ├── user.py         ← Fonctions liées aux utilisateurs (DB)
+│   │   └── virement.py     ← Fonctions liées aux virements (DB)
 │   ├── routes/
 │   │   ├── health.py       ← GET /health
 │   │   ├── auth.py         ← POST /auth/register, POST /auth/login
-│   │   └── users.py        ← GET/PUT /users/me, PUT /users/me/password
+│   │   ├── users.py        ← GET/PUT /users/me, PUT /users/me/password
+│   │   └── virements.py    ← POST /virements, GET /virements
 │   └── utils/
 │       └── db.py           ← Connexion MySQL
 ├── frontend/               ← React/TypeScript (en cours)
@@ -116,6 +118,35 @@ curl -X PUT http://localhost:5001/users/me/password \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer TON_TOKEN" \
   -d '{"old_password": "ancien123", "new_password": "nouveau123"}'
+```
+
+### Virements (protégé par JWT)
+
+> Toutes ces routes nécessitent le header : `Authorization: Bearer <token>`
+
+| Méthode | Route | Description |
+|---------|-------|-------------|
+| POST | `/virements` | Envoyer de l'argent à un autre utilisateur |
+| GET | `/virements` | Récupérer l'historique de ses virements |
+
+#### Règles de validation
+- `receiver_id` et `amount` sont requis
+- Le montant doit être **supérieur à 0**
+- Impossible de s'envoyer de l'argent à soi-même
+- Le solde de l'expéditeur doit être suffisant
+- Les notifications sont créées automatiquement pour l'expéditeur et le destinataire
+
+**Envoyer un virement :**
+```bash
+curl -X POST http://localhost:5001/virements \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TON_TOKEN" \
+  -d '{"receiver_id": 2, "amount": 100, "description": "Remboursement"}'
+```
+
+**Voir l'historique :**
+```bash
+curl -H "Authorization: Bearer TON_TOKEN" http://localhost:5001/virements
 ```
 
 ---
@@ -284,8 +315,7 @@ Tables MySQL disponibles :
 - Export de la fonction find_all_users dans backend/models/user.py
 
 ### Points en attente
-- Endpoint POST /transfers nécessite l'enregistrement du blueprint transfers_bp dans backend/app.py
-- À compléter par Louis (backend) et Angie (database)
+- Les hooks frontend utilisent `/transfers` mais les routes backend sont `/virements` — à aligner avec Manon
 
 ## 👥 Équipe
 

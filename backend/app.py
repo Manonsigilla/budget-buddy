@@ -9,6 +9,7 @@ from flask_jwt_extended import JWTManager
 from routes.health import health_bp
 from routes.auth import auth_bp
 from routes.users import users_bp
+from routes.virements import virements_bp
 
 app = Flask(__name__)
 
@@ -26,7 +27,8 @@ JWTManager(app)
 # Enregistrement des blueprints (routes groupées par fonctionnalité)
 app.register_blueprint(health_bp)
 app.register_blueprint(auth_bp)
-app.register_blueprint(users_bp)    
+app.register_blueprint(users_bp)
+app.register_blueprint(virements_bp)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
