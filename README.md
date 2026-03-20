@@ -19,6 +19,7 @@ docker compose down -v && docker compose up --build
 - Database: localhost:3307 (user: bank_user)
 
 ### Vérification
+
 ```bash
 curl http://localhost:5001/health
 ```
