@@ -13,7 +13,7 @@ from routes.users import users_bp
 from routes.virements import virements_bp
 from routes.notifications import notifications_bp
 from routes.bankers import bankers_bp
-from.routes.messages import messages_bp
+from routes.messages import messages_bp
 
 app = Flask(__name__)
 
