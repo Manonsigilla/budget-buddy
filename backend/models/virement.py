@@ -86,10 +86,27 @@ def create_virement(sender_id, receiver_id, amount, description=None, category_i
             )
         )
 
+        # Vérifier le solde restant de l'expéditeur après le virement
+        # Si le solde passe sous 100€, on crée une alerte de découvert
+        new_balance = float(sender['balance']) - float(amount)
+        SEUIL_ALERTE = 100.0
+
+        if new_balance < SEUIL_ALERTE:
+            cursor.execute(
+                """INSERT INTO notifications (user_id, type, title, message, related_transfer_id)
+                   VALUES (%s, 'overdraft_alert', %s, %s, %s)""",
+                (
+                    sender_id,
+                    "Solde faible",
+                    f"Attention, votre solde est passé sous {SEUIL_ALERTE}€. Solde actuel : {new_balance:.2f}€",
+                    virement_id
+                )
+            )
+
         db.commit()
         cursor.close()
         db.close()
-        return {"id": virement_id, "reference": reference, "status": "completed"}, None
+        return {"id": virement_id, "reference": reference, "status": "completed", "new_balance": new_balance}, None
 
     except Exception as e:
         db.rollback()
