@@ -11,6 +11,7 @@ from routes.auth import auth_bp
 from routes.users import users_bp
 from routes.virements import virements_bp
 from routes.notifications import notifications_bp
+from routes.bankers import bankers_bp
 
 app = Flask(__name__)
 
@@ -31,6 +32,7 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(users_bp)
 app.register_blueprint(virements_bp)
 app.register_blueprint(notifications_bp)
+app.register_blueprint(bankers_bp)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
