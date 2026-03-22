@@ -11,6 +11,7 @@ import TransfersPage from './pages/TransfersPage';
 import SettingsPage from './pages/SettingsPage';
 import PrivateRoute from './components/PrivateRoute';
 import Home from './pages/Home';
+import ContactPage from './pages/ContactPage';
 
 function AppContent() {
     const { user } = useAuth();
@@ -29,6 +30,7 @@ function AppContent() {
                 <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
                 <Route path="/transfers" element={<PrivateRoute><TransfersPage /></PrivateRoute>} />
                 <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
+                <Route path="/contact" element={<PrivateRoute><ContactPage /></PrivateRoute>} />
                 <Route path="/settings" element={<PrivateRoute><SettingsPage /></PrivateRoute>} />
             </Routes>
         </>

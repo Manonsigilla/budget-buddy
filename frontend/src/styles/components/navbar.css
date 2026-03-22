@@ -228,3 +228,29 @@ nav.navbar {
 .user-menu a.danger {
     color: #dc3545;
 }
+
+/* ========== UNREAD INDICATOR ========== */
+.contact-link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.unread-dot {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 8px;
+    height: 8px;
+    background-color: var(--primary-accent);
+    border-radius: 50%;
+    box-shadow: 0 0 5px var(--primary-accent);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(118, 79, 105, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(118, 79, 105, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(118, 79, 105, 0); }
+}

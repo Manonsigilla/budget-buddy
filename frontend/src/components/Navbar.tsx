@@ -1,16 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import ThemeToggle from './ThemeToggle';
-import { Link, useNavigate } from 'react-router-dom';
+import { useMessages } from '../hooks/useMessages';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import '../styles/components/navbar.css';
 
 export default function Navbar() {
     const { isAuthenticated, user, logout } = useAuth();
     const { theme } = useTheme();
+    const { inboxMessages, fetchInbox } = useMessages();
     const navigate = useNavigate();
+    const location = useLocation();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+
+    useEffect(() => {
+        if (isAuthenticated) {
+            fetchInbox();
+        }
+    }, [isAuthenticated, fetchInbox, location.pathname]);
+
+    const hasUnreadMessages = inboxMessages.some(msg => !msg.is_read);
 
     const handleLogout = () => {
         logout();
@@ -74,6 +85,13 @@ export default function Navbar() {
                             <li>
                                 <Link to="/profile" onClick={closeMobileMenu}>
                                     Profil
+                                </Link>
+                            </li>
+                            <li>
+                                <Link to="/contact" onClick={closeMobileMenu} className="contact-link">
+                                    <i className="fas fa-envelope"></i>
+                                    Contact
+                                    {hasUnreadMessages && <span className="unread-dot" title="Vous avez de nouveaux messages"></span>}
                                 </Link>
                             </li>
                         </>
