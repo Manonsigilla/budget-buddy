@@ -1,0 +1,206 @@
+/* ========== ANALYTICS MODAL OVERLAY ========== */
+.analytics-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: var(--z-modal);
+    padding: var(--spacing-lg);
+}
+
+.analytics-modal-content {
+    background: var(--current-bg-secondary);
+    border-radius: var(--radius-lg);
+    width: 100%;
+    max-width: 1000px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--current-border-color);
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* ========== ANALYTICS HEADER ========== */
+.analytics-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-2xl);
+    border-bottom: 1px solid var(--current-border-color);
+    gap: var(--spacing-lg);
+}
+
+.analytics-header h2 {
+    margin: 0;
+    color: var(--current-text-primary);
+    font-size: var(--font-size-2xl);
+}
+
+.analytics-close-btn {
+    background: transparent;
+    border: none;
+    color: var(--current-text-secondary);
+    font-size: var(--font-size-lg);
+    cursor: pointer;
+    transition: color var(--transition-base);
+    padding: var(--spacing-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+}
+
+.analytics-close-btn:hover {
+    color: var(--current-text-primary);
+}
+
+/* ========== ANALYTICS TABS ========== */
+.analytics-tabs {
+    display: flex;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-lg) var(--spacing-2xl) 0 var(--spacing-2xl);
+    border-bottom: 1px solid var(--current-border-color);
+    overflow-x: auto;
+    flex-wrap: wrap;
+}
+
+.analytics-tab {
+    background: transparent;
+    border: none;
+    color: var(--current-text-secondary);
+    font-size: var(--font-size-base);
+    padding: var(--spacing-md) var(--spacing-lg);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    border-bottom: 3px solid transparent;
+    font-weight: var(--font-weight-medium);
+    white-space: nowrap;
+    position: relative;
+}
+
+.analytics-tab:hover {
+    color: var(--current-text-primary);
+}
+
+.analytics-tab.active {
+    color: var(--primary-accent);
+    border-bottom-color: var(--primary-accent);
+}
+
+/* ========== ANALYTICS CHART CONTAINER ========== */
+.analytics-chart-container {
+    padding: var(--spacing-2xl);
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.analytics-chart {
+    width: 100%;
+    max-height: 500px;
+    position: relative;
+}
+
+/* ========== ANALYTICS STATS ========== */
+.analytics-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-lg);
+    padding: var(--spacing-2xl);
+    border-top: 1px solid var(--current-border-color);
+    background: rgba(var(--current-bg-primary-rgb), 0.3);
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.stat-label {
+    color: var(--current-text-tertiary);
+    font-size: var(--font-size-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: var(--font-weight-medium);
+    margin: 0;
+}
+
+.stat-value {
+    color: var(--current-text-primary);
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    margin: 0;
+}
+
+.stat-value.sent {
+    color: #dc3545;
+}
+
+.stat-value.received {
+    color: #28a745;
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+    .analytics-modal-content {
+        max-height: 100vh;
+        border-radius: 0;
+    }
+
+    .analytics-header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: var(--spacing-lg);
+    }
+
+    .analytics-header h2 {
+        font-size: var(--font-size-xl);
+    }
+
+    .analytics-close-btn {
+        position: absolute;
+        top: var(--spacing-lg);
+        right: var(--spacing-lg);
+    }
+
+    .analytics-tabs {
+        padding: var(--spacing-md) var(--spacing-lg) 0 var(--spacing-lg);
+    }
+
+    .analytics-tab {
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: var(--font-size-sm);
+    }
+
+    .analytics-chart-container {
+        padding: var(--spacing-lg);
+        min-height: 300px;
+    }
+
+    .analytics-stats {
+        grid-template-columns: 1fr;
+        padding: var(--spacing-lg);
+    }
+}
