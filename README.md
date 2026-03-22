@@ -15,7 +15,7 @@ docker compose down -v && docker compose up --build
 ### Accès
 
 - Frontend: http://localhost:3000
-- Backend API: http://localhost:5001
+- Backend API: http://localhost:5000
 - Database: localhost:3307 (user: bank_user)
 
 ### Vérification
