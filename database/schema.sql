@@ -99,6 +99,20 @@ CREATE TABLE IF NOT EXISTS banker_clients (
     INDEX idx_banker (banker_id)
 );
 
+CREATE TABLE IF NOT EXISTS messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    sender_id INT NOT NULL,
+    receiver_id INT NOT NULL,
+    subject VARCHAR(255) NOT NULL,
+    body TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    read_at TIMESTAMP NULL,
+    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_sender (sender_id),
+    INDEX idx_receiver (receiver_id)
+);
+
 SET FOREIGN_KEY_CHECKS=1;
 
 -- ============================================
@@ -136,4 +150,5 @@ INSERT IGNORE INTO schema_migrations (migration_name) VALUES
 ('002_add_notifications'),
 ('003_add_categories'),
 ('004_add_banker_system'),
-('005_create_transfers_view');
+('005_create_transfers_view'),
+('006_create_messages_table');

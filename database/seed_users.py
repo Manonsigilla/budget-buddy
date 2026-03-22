@@ -256,9 +256,46 @@ def seed_bankers(connection):
     if assigned > 0:
         print(f" {assigned} clients assignes a Charles le banquier !")
 
+def seed_messages(connection):
+    cursor = connection.cursor(dictionary=True)
+    cursor.execute("SELECT id, email FROM users WHERE email IN ('banker1@bank.com', 'alice@bank.com', 'bob@bank.com')")
+    users = cursor.fetchall()
+    
+    banker = next((u for u in users if u['email'] == 'banker1@bank.com'), None)
+    alice = next((u for u in users if u['email'] == 'alice@bank.com'), None)
+    bob = next((u for u in users if u['email'] == 'bob@bank.com'), None)
+    
+    if banker and alice and bob:
+        try:
+            # Banker sends a message to Alice
+            cursor.execute("""
+                INSERT INTO messages (sender_id, receiver_id, subject, body, created_at)
+                VALUES (%s, %s, %s, %s, %s)
+            """, (banker['id'], alice['id'], "Bienvenue !", "Bonjour Alice, je suis Charles, ton nouveau conseiller financier. N'hésite pas à me contacter via cette messagerie.", datetime.now() - timedelta(days=2)))
+            
+            # Alice replies
+            cursor.execute("""
+                INSERT INTO messages (sender_id, receiver_id, subject, body, created_at)
+                VALUES (%s, %s, %s, %s, %s)
+            """, (alice['id'], banker['id'], "Re: Bienvenue !", "Merci Charles, j'ai hâte de voir mes prochains rendements.", datetime.now() - timedelta(days=1)))
+            
+            # Banker sends a message to Bob
+            cursor.execute("""
+                INSERT INTO messages (sender_id, receiver_id, subject, body, created_at)
+                VALUES (%s, %s, %s, %s, %s)
+            """, (banker['id'], bob['id'], "Clôture de compte", "Bonjour Bob, pourriez-vous m'envoyer les documents signés ?", datetime.now() - timedelta(hours=5)))
+
+            connection.commit()
+            print(" 3 messages de test seedés avec succès !")
+        except mysql.connector.Error as err:
+            print(f"Erreur lors du seed des messages: {err}")
+    
+    cursor.close()
+
 if __name__ == '__main__':
     conn = connect_to_db()
     seed_users(conn)
     seed_bankers(conn)
     seed_transactions(conn)
+    seed_messages(conn)
     conn.close()

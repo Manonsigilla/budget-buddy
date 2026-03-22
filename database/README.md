@@ -29,6 +29,7 @@
 | `notifications` | Notifications utilisateur | user_id, type, is_read |
 | `audit_logs` | Journal des actions | user_id, action, details (JSON) |
 | `banker_clients` | Relation banquier-client | banker_id, client_id |
+| `messages` | Messagerie interne | sender_id, receiver_id, subject |
 | `schema_migrations` | Suivi des migrations | migration_name, applied_at |
 
 ### `banker_clients`
@@ -58,6 +59,7 @@ users ──< virements >── users
 users ──< notifications
 virements >-- categories
 users ──< banker_clients >── users
+users ──< messages >── users
 
 users ──< audit_logs
 ```
@@ -96,3 +98,16 @@ docker exec -it banking_app_api python /database/seed_users.py
 - ✅ Semaine 1 : Pages statiques + API service
 - ✅ Semaine 2 : Login + Dashboard intégrés
 - ✅ Semaine 3 : Tous les features
+
+### `messages`
+Système de messagerie interne permettant aux utilisateurs (notamment les banquiers et les clients) de s'envoyer des messages sécurisés.
+
+| Column | Type | Constraints |
+|--------|------|-------------|
+| `id` | `INT` | `PK, AUTO_INCREMENT` |
+| `sender_id` | `INT` | `NOT NULL, FK -> users.id (CASCADE)` |
+| `receiver_id` | `INT` | `NOT NULL, FK -> users.id (CASCADE)` |
+| `subject` | `VARCHAR(255)` | `NOT NULL` |
+| `body` | `TEXT` | `NOT NULL` |
+| `created_at` | `TIMESTAMP` | `DEFAULT CURRENT_TIMESTAMP` |
+| `read_at` | `TIMESTAMP` | `NULL` |
