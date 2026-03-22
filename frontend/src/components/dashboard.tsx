@@ -29,8 +29,8 @@ interface FormData {
 
 export default function Dashboard() {
     const { user, logout } = useAuth();
-    const { users } = useUsers();
-    const { transfers, isLoading: transfersLoading, applyFilters, resetFilters } = useFilteredTransfers();
+    const { users, error: usersError, isLoading: usersLoading } = useUsers();
+    const { transfers, isLoading: transfersLoading, error: transfersError, applyFilters, resetFilters } = useFilteredTransfers();
     const { createTransfer, isLoading: transferCreating, error: createError, success: createSuccess, resetMessages } = useCreateTransfer();
 
     const [currentUser, setCurrentUser] = useState<UserData | null>(user);
@@ -111,22 +111,12 @@ export default function Dashboard() {
                 </div>
 
                 {/* AFFICHAGE DES ERREURS */}
-                {(() => {
-                    const userError = null;
-                    const usersError = useUsers().error;
-                    const transfersError = null;
-                    
-                    const hasError = usersError || transfersError || userError;
-                    
-                    if (!hasError) return null;
-                    
-                    return (
-                        <div className="card-info error">
-                            <i className="fas fa-exclamation-triangle"></i>
-                            {usersError || transfersError || userError}
-                        </div>
-                    );
-                })()}
+                {(usersError || transfersError) && (
+                    <div className="card-info error">
+                        <i className="fas fa-exclamation-triangle"></i>
+                        {usersError || transfersError}
+                    </div>
+                )}
 
                 {/* INFOS UTILISATEUR */}
                 <div className="card card-glass dashboard-user-info">
