@@ -11,6 +11,7 @@
         "noEmit": true,
         "resolveJsonModule": true,
         "moduleResolution": "bundler",
+        "jsx": "react-jsx",
         "types": ["vite/client"]
     },
     "include": ["src"],

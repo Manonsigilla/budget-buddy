@@ -1,20 +1,16 @@
-# Connexion MySQL
+# Utilitaire de connexion à la base de données MySQL.
+# Chaque route qui a besoin de la DB appelle get_db_connection()
+# et ferme la connexion après usage (cursor.close(), db.close()).
 
-# backend/utils/db.py
 import mysql.connector
 from mysql.connector import Error
-import os
+from config import DB_CONFIG
 
 def get_db_connection():
+    """Crée et retourne une connexion MySQL. Retourne None en cas d'échec."""
     try:
-        connection = mysql.connector.connect(
-            host=os.getenv('DB_HOST', 'localhost'),
-            user=os.getenv('DB_USER', 'bank_user'),
-            password=os.getenv('DB_PASSWORD', 'bank_password_dev'),
-            database=os.getenv('DB_NAME', 'banking_app'),
-            port=int(os.getenv('DB_PORT', 3306))
-        )
+        connection = mysql.connector.connect(**DB_CONFIG)
         return connection
     except Error as e:
-        print(f"Error connecting to DB: {e}")
+        print(f"Erreur de connexion à la DB: {e}")
         return None

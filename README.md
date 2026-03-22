@@ -19,6 +19,7 @@ docker compose down -v && docker compose up --build
 - Database: localhost:3307 (user: bank_user)
 
 ### Vérification
+
 ```bash
 curl http://localhost:5001/health
 ```
@@ -37,10 +38,13 @@ budget-buddy/
 │   ├── requirements.txt    ← Dépendances Python
 │   ├── Dockerfile
 │   ├── models/
-│   │   └── user.py         ← Fonctions liées aux utilisateurs (DB)
+│   │   ├── user.py         ← Fonctions liées aux utilisateurs (DB)
+│   │   └── virement.py     ← Fonctions liées aux virements (DB)
 │   ├── routes/
 │   │   ├── health.py       ← GET /health
-│   │   └── auth.py         ← POST /auth/register, POST /auth/login
+│   │   ├── auth.py         ← POST /auth/register, POST /auth/login
+│   │   ├── users.py        ← GET/PUT /users/me, PUT /users/me/password
+│   │   └── virements.py    ← POST /virements, GET /virements
 │   └── utils/
 │       └── db.py           ← Connexion MySQL
 ├── frontend/               ← React/TypeScript (en cours)
@@ -65,7 +69,10 @@ budget-buddy/
 | POST | `/auth/register` | Créer un compte |
 | POST | `/auth/login` | Se connecter, reçoit un token JWT |
 
-### Exemples
+#### Règles de validation
+- Tous les champs sont requis : `username`, `email`, `password`, `first_name`, `last_name`
+- Email doit être au format valide (ex: `alice@test.com`)
+- Mot de passe minimum **8 caractères**
 
 **Register :**
 ```bash
@@ -81,11 +88,195 @@ curl -X POST http://localhost:5001/auth/login \
   -d '{"email": "alice@test.com", "password": "motdepasse"}'
 ```
 
+### Utilisateurs (protégé par JWT)
+
+> Toutes ces routes nécessitent le header : `Authorization: Bearer <token>`
+
+| Méthode | Route | Description |
+|---------|-------|-------------|
+| GET | `/users/me` | Récupérer son profil et son solde |
+| PUT | `/users/me` | Modifier son profil (nom, email, username) |
+| PUT | `/users/me/password` | Changer son mot de passe |
+
+**Récupérer son profil :**
+```bash
+curl -H "Authorization: Bearer TON_TOKEN" \
+  http://localhost:5001/users/me
+```
+
+**Modifier son profil :**
+```bash
+curl -X PUT http://localhost:5001/users/me \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TON_TOKEN" \
+  -d '{"first_name": "Louis", "last_name": "Martin"}'
+```
+
+**Changer son mot de passe :**
+```bash
+curl -X PUT http://localhost:5001/users/me/password \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TON_TOKEN" \
+  -d '{"old_password": "ancien123", "new_password": "nouveau123"}'
+```
+
+### Virements (protégé par JWT)
+
+> Toutes ces routes nécessitent le header : `Authorization: Bearer <token>`
+
+| Méthode | Route | Description |
+|---------|-------|-------------|
+| POST | `/virements` | Envoyer de l'argent à un autre utilisateur |
+| GET | `/virements` | Récupérer l'historique de ses virements |
+
+#### Règles de validation
+- `receiver_id` et `amount` sont requis
+- Le montant doit être **supérieur à 0**
+- Impossible de s'envoyer de l'argent à soi-même
+- Le solde de l'expéditeur doit être suffisant
+- Les notifications sont créées automatiquement pour l'expéditeur et le destinataire
+
+**Envoyer un virement :**
+```bash
+curl -X POST http://localhost:5001/virements \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TON_TOKEN" \
+  -d '{"receiver_id": 2, "amount": 100, "description": "Remboursement"}'
+```
+
+**Voir l'historique :**
+```bash
+curl -H "Authorization: Bearer TON_TOKEN" http://localhost:5001/virements
+```
+
+---
+
+## 🔐 Sécurité des mots de passe
+
+Les mots de passe ne sont **jamais stockés en clair** dans la base de données. On utilise trois mécanismes combinés avec la librairie Python intégrée `hashlib` :
+
+### 1. Hashage (hashlib)
+
+Le mot de passe est transformé en une chaîne illisible grâce à `pbkdf2_hmac` (SHA-256). C'est une fonction à **sens unique** — impossible de retrouver le mot de passe original à partir du hash.
+
+```
+"motdepasse" → "a3f8c2d9e1b7..." (stocké en DB)
+```
+
+### 2. Sel (`os.urandom(32)`)
+
+Une valeur aléatoire unique est générée à chaque inscription et ajoutée au mot de passe avant de le hacher. Résultat : deux utilisateurs avec le même mot de passe auront des hashs **différents** en base de données.
+
+```
+"motdepasse" + sel_aléatoire_1 → "a3f8c2d9..."
+"motdepasse" + sel_aléatoire_2 → "x9k2m7p1..."  ← hash différent !
+```
+
+Le sel est stocké en base de données avec le hash (format `sel:hash`).
+
+### 3. Poivre (`PASSWORD_PEPPER`)
+
+Une valeur secrète fixe stockée dans les **variables d'environnement Docker** — jamais en base de données. Si un hacker vole la base de données MySQL, il a les sels mais pas le poivre → il ne peut pas reconstruire les hashs.
+
+```
+"motdepasse" + poivre → + sel → hash final
+```
+
+### En résumé
+
+```python
+# Inscription
+peppered = password + PEPPER          # ajout du poivre
+salt = os.urandom(32)                 # sel aléatoire unique
+key = hashlib.pbkdf2_hmac(...)        # hashage SHA-256
+stocké en DB → "salt_hex:key_hex"
+
+# Connexion
+# on relit le sel depuis la DB
+# on refait le même calcul avec le poivre
+# on compare les deux hashs
+```
+
+---
+
+## 🔑 Variables d'environnement
+
+Toutes les valeurs sensibles sont dans le `docker-compose.yml` sous forme de variables d'environnement — jamais dans le code source.
+
+| Variable | Description |
+|----------|-------------|
+| `DB_HOST` | Hôte MySQL |
+| `DB_USER` | Utilisateur MySQL |
+| `DB_PASSWORD` | Mot de passe MySQL |
+| `DB_NAME` | Nom de la base de données |
+| `PASSWORD_PEPPER` | Poivre pour le hashage des mots de passe |
+| `SECRET_KEY` | Clé secrète Flask |
+| `JWT_SECRET_KEY` | Clé secrète pour les tokens JWT |
+
+---
+
+## 🛠️ Commandes utiles
+
+### Docker
+
+```bash
+# Lancer le projet (première fois ou après un changement de code)
+docker compose up --build
+
+# Lancer le projet (sans rebuild)
+docker compose up
+
+# Arrêter le projet
+docker compose down
+
+# Arrêter et supprimer les données MySQL (repart de zéro)
+docker compose down -v
+
+# Voir les logs en temps réel
+docker compose logs -f
+
+# Voir les logs d'un seul conteneur
+docker compose logs -f backend
+docker compose logs -f mysql
+docker compose logs -f frontend
+```
+
+### Base de données
+
+```bash
+# Ouvrir MySQL dans le terminal
+docker exec -it banking_app_db mysql -u bank_user -pbank_password_dev banking_app
+
+# Voir tous les utilisateurs
+docker exec -it banking_app_db mysql -u bank_user -pbank_password_dev banking_app -e "SELECT id, username, email, balance FROM users;"
+
+# Voir tous les virements
+docker exec -it banking_app_db mysql -u bank_user -pbank_password_dev banking_app -e "SELECT * FROM virements;"
+```
+
+### Tester l'API
+
+```bash
+# Vérifier que l'API tourne
+curl http://localhost:5001/health
+
+# Créer un compte
+curl -X POST http://localhost:5001/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"username": "alice", "email": "alice@test.com", "password": "motdepasse", "first_name": "Alice", "last_name": "Dupont"}'
+
+# Se connecter
+curl -X POST http://localhost:5001/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "alice@test.com", "password": "motdepasse"}'
+```
+
 ---
 
 ## 🗃️ Base de données
 
 Tables MySQL disponibles :
+
 - `users` — comptes utilisateurs
 - `categories` — catégories de virements
 - `virements` — historique des transactions
@@ -94,8 +285,40 @@ Tables MySQL disponibles :
 
 ---
 
+## Frontend React/TypeScript
+
+### Étape 1 - Authentification (Terminée)
+- AuthContext : gestion de l'état d'authentification global avec persistance localStorage
+- Login : formulaire de connexion avec validation des champs
+- Register : formulaire d'inscription avec validation (8 caractères minimum, email valide)
+- API intégrée avec le backend Flask pour l'inscription et la connexion
+- Persistance du token JWT et données utilisateur en localStorage
+- Protection des routes avec PrivateRoute (affiche loader pendant restauration)
+- Restauration automatique de la session au rechargement de la page
+
+### Étape 2 - Dashboard (Terminée)
+- Dashboard : affichage des informations utilisateur (nom, email, username)
+- Solde disponible avec formatage en EUR
+- Historique des virements avec tableau (ID, montant, statut, date, description)
+- Récupération des infos utilisateur actualisées via GET /users/me
+- Hook personnalisé useTransfers pour la gestion des virements (GET /transfers)
+- Hook personnalisé useCreateTransfer pour créer un virement (POST /transfers)
+- Hook personnalisé useUsers pour récupérer la liste des utilisateurs (GET /users)
+- Formulaire de virement avec liste déroulante des destinataires (affiche nom, prénom, username, email)
+- Distinction visuelle des montants entrants (+) et sortants (-) par couleur
+- Indicateurs de statut des virements (completed, pending)
+- Bouton de déconnexion avec nettoyage complet (token et user)
+
+### Modifications Backend requises (effectuées)
+- Ajout de l'endpoint GET /users dans backend/routes/users.py
+- Enregistrement du blueprint users_bp dans backend/app.py
+- Export de la fonction find_all_users dans backend/models/user.py
+
+### Points en attente
+- Les hooks frontend utilisent `/transfers` mais les routes backend sont `/virements` — à aligner avec Manon
+
 ## 👥 Équipe
 
-- Frontend: Toi
-- Backend: Collègue #1
-- Database: Collègue #2
+- Frontend: Manon
+- Backend: Louis
+- Database: Angie

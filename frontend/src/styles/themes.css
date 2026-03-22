@@ -1,0 +1,42 @@
+/* ========== LIGHT MODE (PAR DÉFAUT) ========== */
+[data-theme="light"],
+:root {
+    --current-bg-primary: var(--background);
+    --current-bg-secondary: var(--secondary-accent);
+    --current-bg-tertiary: var(--accent-3);
+    --current-text-primary: var(--text-dark);
+    --current-text-secondary: var(--text);
+    --current-text-tertiary: #a0a0a0;
+    --current-border-color: rgba(118, 79, 105, 0.2);
+    --current-shadow-color: rgba(118, 79, 105, 0.1);
+    --current-backdrop: rgba(220, 197, 179, 0.3);
+}
+
+/* ========== DARK MODE ========== */
+[data-theme="dark"] {
+    --current-bg-primary: #0f0f0f;
+    --current-bg-secondary: #1a1a1a;
+    --current-bg-tertiary: #2a2a2a;
+    --current-text-primary: #f0f0f0;
+    --current-text-secondary: #b0b0b0;
+    --current-text-tertiary: #808080;
+    --current-border-color: rgba(235, 245, 238, 0.15);
+    --current-shadow-color: rgba(0, 0, 0, 0.3);
+    --current-backdrop: rgba(26, 26, 26, 0.5);
+}
+
+/* ========== TRANSITIONS LORS DU CHANGEMENT DE THÈME ========== */
+body {
+    transition: background-color var(--transition-base), color var(--transition-base);
+}
+
+* {
+    transition: background-color var(--transition-base), color var(--transition-base), border-color var(--transition-base), box-shadow var(--transition-base);
+}
+
+/* Éviter les transitions excessives sur les animations */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        transition: none !important;
+    }
+}
