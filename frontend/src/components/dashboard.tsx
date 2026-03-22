@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useUsers } from '../hooks/useUsers';
-import { useTransfers } from '../hooks/useTransfers';
+import { useFilteredTransfers } from '../hooks/useFilteredTransfers';
 import { useCreateTransfer } from '../hooks/useCreateTransfer';
 import api from '../api';
 import '../styles/components/card.css';
 import '../styles/components/form.css';
 import '../styles/components/table.css';
 import '../styles/components/button.css';
+import '../styles/components/dashboard.css';
+import TransferFilter from './TransferFilter';
 
 interface UserData {
     id: number;
@@ -27,7 +29,7 @@ interface FormData {
 export default function Dashboard() {
     const { user, logout } = useAuth();
     const { users } = useUsers();
-    const { transfers, isLoading: transfersLoading } = useTransfers();
+    const { transfers, isLoading: transfersLoading, applyFilters, resetFilters } = useFilteredTransfers();
     const { createTransfer, isLoading: transferCreating, error: createError, success: createSuccess, resetMessages } = useCreateTransfer();
 
     const [currentUser, setCurrentUser] = useState<UserData | null>(user);
@@ -37,6 +39,10 @@ export default function Dashboard() {
         amount: '',
         description: '',
     });
+
+    useEffect(() => {
+        resetFilters();
+    }, [resetFilters]);
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -68,209 +74,97 @@ export default function Dashboard() {
             return;
         }
 
+        const amount = parseFloat(formData.amount);
+        if (isNaN(amount) || amount <= 0) {
+            return;
+        }
+
         const success = await createTransfer({
             receiver_id: parseInt(formData.receiver_id),
-            amount: parseFloat(formData.amount),
+            amount: amount,
             description: formData.description || undefined,
         });
 
         if (success) {
             setFormData({ receiver_id: '', amount: '', description: '' });
             setShowTransferForm(false);
-            window.location.reload();
+            resetFilters();
         }
     };
 
     if (!user || !currentUser) {
-        return (
-            <div style={{
-                padding: 'var(--spacing-lg)',
-                textAlign: 'center',
-            }}>
-                Chargement...
-            </div>
-        );
+        return <div className="loading-container">Chargement...</div>;
     }
 
     return (
-        <div style={{
-            minHeight: '100vh',
-            padding: 'var(--spacing-lg)',
-            background: 'linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%)',
-        }}>
-            <div style={{
-                maxWidth: '1200px',
-                margin: '0 auto',
-            }}>
+        <div className="dashboard-container">
+            <div className="dashboard-content">
                 {/* HEADER */}
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: 'var(--spacing-2xl)',
-                    flexWrap: 'wrap',
-                    gap: 'var(--spacing-md)',
-                }}>
-                    <h1 style={{
-                        color: 'var(--text-primary)',
-                        fontSize: 'var(--font-size-3xl)',
-                        margin: 0,
-                    }}>
-                        Tableau de bord
-                    </h1>
-                    <button onClick={handleLogout} className="btn-danger">
+                <div className="dashboard-header">
+                    <h1>Tableau de bord</h1>
+                    <button onClick={handleLogout} className="btn btn-danger">
+                        <i className="fas fa-sign-out-alt"></i>
                         Déconnexion
                     </button>
                 </div>
 
                 {/* INFOS UTILISATEUR */}
-                <div className="card-glass" style={{
-                    marginBottom: 'var(--spacing-2xl)',
-                    padding: 'var(--spacing-2xl)',
-                }}>
-                    <h2 style={{
-                        color: 'var(--text-primary)',
-                        marginBottom: 'var(--spacing-lg)',
-                    }}>
-                        Informations de compte
-                    </h2>
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-                        gap: 'var(--spacing-lg)',
-                    }}>
-                        <div>
-                            <p style={{
-                                color: 'var(--text-tertiary)',
-                                fontSize: 'var(--font-size-sm)',
-                                marginBottom: 'var(--spacing-sm)',
-                                textTransform: 'uppercase',
-                                letterSpacing: '0.5px',
-                            }}>
-                                Nom complet
-                            </p>
-                            <p style={{
-                                fontSize: 'var(--font-size-lg)',
-                                fontWeight: 'var(--font-weight-bold)',
-                                color: 'var(--text-primary)',
-                                margin: 0,
-                            }}>
+                <div className="card card-glass dashboard-user-info">
+                    <h2>Informations de compte</h2>
+                    <div className="user-info-grid">
+                        <div className="info-item">
+                            <p className="info-label">Nom complet</p>
+                            <p className="info-value">
                                 {currentUser.first_name} {currentUser.last_name}
                             </p>
                         </div>
-                        <div>
-                            <p style={{
-                                color: 'var(--text-tertiary)',
-                                fontSize: 'var(--font-size-sm)',
-                                marginBottom: 'var(--spacing-sm)',
-                                textTransform: 'uppercase',
-                                letterSpacing: '0.5px',
-                            }}>
-                                Email
-                            </p>
-                            <p style={{
-                                fontSize: 'var(--font-size-base)',
-                                color: 'var(--text-secondary)',
-                                margin: 0,
-                            }}>
-                                {currentUser.email}
-                            </p>
+                        <div className="info-item">
+                            <p className="info-label">Email</p>
+                            <p className="info-value">{currentUser.email}</p>
                         </div>
-                        <div>
-                            <p style={{
-                                color: 'var(--text-tertiary)',
-                                fontSize: 'var(--font-size-sm)',
-                                marginBottom: 'var(--spacing-sm)',
-                                textTransform: 'uppercase',
-                                letterSpacing: '0.5px',
-                            }}>
-                                Identifiant
-                            </p>
-                            <p style={{
-                                fontSize: 'var(--font-size-base)',
-                                color: 'var(--text-secondary)',
-                                margin: 0,
-                            }}>
-                                {currentUser.username}
-                            </p>
+                        <div className="info-item">
+                            <p className="info-label">Identifiant</p>
+                            <p className="info-value">{currentUser.username}</p>
                         </div>
                     </div>
                 </div>
 
                 {/* SOLDE */}
-                <div style={{
-                    background: 'linear-gradient(135deg, var(--primary-accent) 0%, rgba(118, 79, 105, 0.8) 100%)',
-                    color: 'white',
-                    padding: 'var(--spacing-2xl)',
-                    borderRadius: 'var(--radius-lg)',
-                    marginBottom: 'var(--spacing-2xl)',
-                    textAlign: 'center',
-                    boxShadow: '0 10px 30px rgba(118, 79, 105, 0.3)',
-                }}>
-                    <p style={{
-                        fontSize: 'var(--font-size-base)',
-                        marginBottom: 'var(--spacing-md)',
-                        opacity: 0.9,
-                    }}>
-                        Solde disponible
-                    </p>
-                    <h2 style={{
-                        fontSize: 'var(--font-size-4xl)',
-                        margin: 0,
-                        fontWeight: 'var(--font-weight-bold)',
-                    }}>
+                <div className="dashboard-balance">
+                    <p className="balance-label">Solde disponible</p>
+                    <h2 className="balance-value">
                         {currentUser.balance.toFixed(2)} €
                     </h2>
                 </div>
 
                 {/* VIREMENT */}
-                <div className="card-glass" style={{
-                    marginBottom: 'var(--spacing-2xl)',
-                    padding: 'var(--spacing-2xl)',
-                }}>
-                    <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        marginBottom: 'var(--spacing-lg)',
-                        flexWrap: 'wrap',
-                        gap: 'var(--spacing-md)',
-                    }}>
-                        <h2 style={{
-                            color: 'var(--text-primary)',
-                            margin: 0,
-                        }}>
-                            Effectuer un virement
-                        </h2>
+                <div className="card card-glass dashboard-transfer">
+                    <div className="transfer-header">
+                        <h2>Effectuer un virement</h2>
                         <button
                             onClick={() => {
                                 setShowTransferForm(!showTransferForm);
                                 resetMessages();
                             }}
-                            className="btn-primary"
+                            className="btn btn-primary"
                         >
+                            <i className={`fas fa-${showTransferForm ? 'times' : 'plus'}`}></i>
                             {showTransferForm ? 'Annuler' : 'Nouveau virement'}
                         </button>
                     </div>
 
                     {showTransferForm && (
-                        <form onSubmit={handleTransferSubmit} className="form-container" style={{
-                            marginTop: 'var(--spacing-lg)',
-                            paddingTop: 'var(--spacing-lg)',
-                            borderTop: '1px solid var(--current-border-color)',
-                        }}>
+                        <form onSubmit={handleTransferSubmit} className="form-container transfer-form">
                             {createError && (
-                                <div className="card-info error" style={{
-                                    marginBottom: 'var(--spacing-lg)',
-                                }}>
+                                <div className="card-info error">
+                                    <i className="fas fa-exclamation-circle"></i>
                                     {createError}
                                 </div>
                             )}
 
                             {createSuccess && (
-                                <div className="card-info success" style={{
-                                    marginBottom: 'var(--spacing-lg)',
-                                }}>
+                                <div className="card-info success">
+                                    <i className="fas fa-check-circle"></i>
                                     Virement créé avec succès !
                                 </div>
                             )}
@@ -323,9 +217,6 @@ export default function Dashboard() {
                                     onChange={handleFormChange}
                                     placeholder="Ex: Remboursement"
                                     className="input-neumorphic"
-                                    style={{
-                                        minHeight: '80px',
-                                    }}
                                     disabled={transferCreating}
                                 />
                             </div>
@@ -333,45 +224,38 @@ export default function Dashboard() {
                             <button
                                 type="submit"
                                 disabled={transferCreating}
-                                className="btn-success btn-lg btn-block"
+                                className="btn btn-success btn-lg btn-block"
                             >
+                                <i className="fas fa-paper-plane"></i>
                                 {transferCreating ? 'Envoi en cours...' : 'Envoyer le virement'}
                             </button>
                         </form>
                     )}
                 </div>
 
+                {/* FILTRES */}
+                <TransferFilter
+                    onApplyFilters={applyFilters}
+                    onResetFilters={resetFilters}
+                    isLoading={transfersLoading}
+                />
+
                 {/* HISTORIQUE */}
-                <div className="card-glass" style={{
-                    padding: 'var(--spacing-2xl)',
-                }}>
-                    <h2 style={{
-                        color: 'var(--text-primary)',
-                        marginBottom: 'var(--spacing-lg)',
-                    }}>
-                        Historique des virements
-                    </h2>
+                <div className="card card-glass dashboard-history">
+                    <h2>Historique des virements</h2>
 
                     {transfersLoading ? (
-                        <p style={{
-                            color: 'var(--text-secondary)',
-                            textAlign: 'center',
-                            padding: 'var(--spacing-2xl) 0',
-                        }}>
+                        <p className="empty-state">
+                            <i className="fas fa-spinner fa-spin"></i>
                             Chargement des virements...
                         </p>
                     ) : transfers.length === 0 ? (
-                        <p style={{
-                            color: 'var(--text-secondary)',
-                            textAlign: 'center',
-                            padding: 'var(--spacing-2xl) 0',
-                        }}>
+                        <p className="empty-state">
+                            <i className="fas fa-inbox"></i>
                             Aucun virement pour le moment
                         </p>
                     ) : (
-                        <div style={{
-                            overflowX: 'auto',
-                        }}>
+                        <div className="table-wrapper">
                             <table>
                                 <thead>
                                     <tr>
@@ -386,11 +270,9 @@ export default function Dashboard() {
                                     {transfers.map((transfer: any, index: number) => (
                                         <tr key={index}>
                                             <td>#{transfer.id}</td>
-                                            <td style={{
-                                                fontWeight: 'var(--font-weight-bold)',
-                                                color: transfer.sender_id === currentUser.id ? '#dc3545' : '#28a745',
-                                            }}>
-                                                {transfer.sender_id === currentUser.id ? '-' : '+'}{transfer.amount.toFixed(2)} €
+                                            <td className={`amount ${transfer.sender_id === currentUser.id ? 'sent' : 'received'}`}>
+                                                {transfer.sender_id === currentUser.id ? '-' : '+'}
+                                                {transfer.amount.toFixed(2)} €
                                             </td>
                                             <td>
                                                 <span className={`status-badge ${transfer.status}`}>

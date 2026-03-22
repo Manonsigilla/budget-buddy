@@ -16,7 +16,15 @@ from routes.bankers import bankers_bp
 app = Flask(__name__)
 
 # Autorise les requêtes depuis le frontend (React sur localhost:3000)
-CORS(app)
+CORS(app, resources={
+    r"/*": {
+        "origins": ["http://localhost:3000", "http://localhost:3001"],
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+        "allow_headers": ["Content-Type", "Authorization"],
+        "supports_credentials": True,
+        "max_age": 3600
+    }
+})
 
 # Clés secrètes chargées depuis les variables d'environnement Docker
 # Ne jamais mettre ces valeurs en dur dans le code en production

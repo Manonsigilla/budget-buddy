@@ -1,0 +1,282 @@
+/* ========== DASHBOARD LAYOUT ========== */
+.dashboard-container {
+    min-height: 100vh;
+    padding: var(--spacing-lg);
+    background: linear-gradient(135deg, var(--background) 0%, var(--secondary-accent) 100%);
+    transition: background var(--transition-base);
+}
+
+[data-theme="dark"] .dashboard-container {
+    background: linear-gradient(135deg, var(--dark-bg-primary) 0%, var(--dark-bg-secondary) 100%);
+}
+
+.dashboard-content {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* ========== DASHBOARD HEADER ========== */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-2xl);
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+}
+
+.dashboard-header h1 {
+    color: var(--current-text-primary);
+    font-size: var(--font-size-3xl);
+    margin: 0;
+    flex: 1;
+    min-width: 200px;
+}
+
+/* ========== DASHBOARD USER INFO ========== */
+.dashboard-user-info {
+    margin-bottom: var(--spacing-2xl);
+    padding: var(--spacing-2xl);
+}
+
+.dashboard-user-info h2 {
+    color: var(--current-text-primary);
+    margin-bottom: var(--spacing-lg);
+}
+
+.user-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.info-label {
+    color: var(--current-text-tertiary);
+    font-size: var(--font-size-sm);
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: var(--font-weight-medium);
+}
+
+.info-value {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    color: var(--current-text-primary);
+    margin: 0;
+}
+
+/* ========== DASHBOARD BALANCE ========== */
+.dashboard-balance {
+    background: linear-gradient(135deg, var(--primary-accent) 0%, rgba(118, 79, 105, 0.8) 100%);
+    color: white;
+    padding: var(--spacing-2xl);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--spacing-2xl);
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(118, 79, 105, 0.3);
+    transition: all var(--transition-base);
+}
+
+.dashboard-balance:hover {
+    box-shadow: 0 15px 40px rgba(118, 79, 105, 0.4);
+    transform: translateY(-4px);
+}
+
+.balance-label {
+    font-size: var(--font-size-base);
+    margin-bottom: var(--spacing-md);
+    opacity: 0.95;
+}
+
+.balance-value {
+    font-size: var(--font-size-4xl);
+    margin: 0;
+    font-weight: var(--font-weight-bold);
+}
+
+/* ========== DASHBOARD TRANSFER ========== */
+.dashboard-transfer {
+    margin-bottom: var(--spacing-2xl);
+    padding: var(--spacing-2xl);
+}
+
+.transfer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+}
+
+.transfer-header h2 {
+    color: var(--current-text-primary);
+    margin: 0;
+    flex: 1;
+    min-width: 200px;
+}
+
+.transfer-form {
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid var(--current-border-color);
+}
+
+/* ========== DASHBOARD HISTORY ========== */
+.dashboard-history {
+    padding: var(--spacing-2xl);
+}
+
+.dashboard-history h2 {
+    color: var(--current-text-primary);
+    margin-bottom: var(--spacing-lg);
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+.table-wrapper table {
+    width: 100%;
+    border-collapse: collapse;
+    background: transparent;
+}
+
+.table-wrapper thead {
+    background: rgba(var(--primary-accent-rgb), 0.05);
+}
+
+.table-wrapper thead th {
+    padding: var(--spacing-md);
+    text-align: left;
+    color: var(--current-text-primary);
+    font-weight: var(--font-weight-semibold);
+    border-bottom: 2px solid var(--current-border-color);
+}
+
+.table-wrapper tbody tr {
+    border-bottom: 1px solid var(--current-border-color);
+    transition: background-color var(--transition-base);
+}
+
+.table-wrapper tbody tr:hover {
+    background: rgba(var(--primary-accent-rgb), 0.05);
+}
+
+.table-wrapper td {
+    padding: var(--spacing-md);
+    color: var(--current-text-secondary);
+}
+
+.table-wrapper .amount {
+    font-weight: var(--font-weight-bold);
+    color: var(--current-text-primary);
+}
+
+.table-wrapper .amount.sent {
+    color: #dc3545;
+}
+
+.table-wrapper .amount.received {
+    color: #28a745;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    background: rgba(var(--primary-accent-rgb), 0.1);
+    color: var(--primary-accent);
+    text-transform: capitalize;
+}
+
+.status-badge.completed {
+    background: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+}
+
+.status-badge.pending {
+    background: rgba(255, 193, 7, 0.1);
+    color: #ffc107;
+}
+
+.status-badge.failed {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+}
+
+/* ========== EMPTY STATE ========== */
+.empty-state {
+    color: var(--current-text-secondary);
+    text-align: center;
+    padding: var(--spacing-2xl) 0;
+    font-size: var(--font-size-base);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-md);
+}
+
+.empty-state i {
+    font-size: var(--font-size-2xl);
+    opacity: 0.6;
+}
+
+.loading-container {
+    padding: var(--spacing-lg);
+    text-align: center;
+    color: var(--current-text-secondary);
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding: var(--spacing-md);
+    }
+
+    .dashboard-header,
+    .transfer-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .dashboard-header h1,
+    .transfer-header h2 {
+        min-width: auto;
+    }
+
+    .dashboard-header button,
+    .transfer-header button {
+        width: 100%;
+    }
+
+    .user-info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .table-wrapper {
+        font-size: var(--font-size-sm);
+    }
+
+    .table-wrapper th,
+    .table-wrapper td {
+        padding: var(--spacing-sm);
+    }
+
+    .dashboard-balance {
+        padding: var(--spacing-lg);
+    }
+
+    .balance-value {
+        font-size: var(--font-size-3xl);
+    }
+}
