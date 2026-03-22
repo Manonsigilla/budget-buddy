@@ -63,6 +63,15 @@ TEST_USERS = [
         'last_name': 'User',
         'balance': 10000.00,
         'account_type': 'admin'
+    },
+    {
+        'username': 'charles_banker',
+        'email': 'banker1@bank.com',
+        'password': 'bankerpass123',
+        'first_name': 'Charles',
+        'last_name': 'Banquier',
+        'balance': 0.00,
+        'account_type': 'banker'
     }
 ]
 
@@ -111,7 +120,7 @@ def seed_users(connection):
 
         if existing:
             print(f"{user['username']} ({user['email']}) existe deja -> ignore")
-            skipped = skipped + 1  # type: ignore
+            skipped = skipped + 1
             continue
 
         # Hasher le mot de passe
@@ -125,7 +134,7 @@ def seed_users(connection):
              user['first_name'], user['last_name'], user['balance'], user['account_type'])
         )
         print(f"{user['username']} ({user['email']}) cree avec succes")
-        inserted = inserted + 1  # type: ignore
+        inserted = inserted + 1
 
     connection.commit()
     cursor.close()
@@ -213,8 +222,43 @@ def seed_transactions(connection):
     cursor.close()
     print(f" {inserted_tx} virements aleatoires generes avec succes !")
 
+def seed_bankers(connection):
+    """Assigne Alice et Bob au portefeuille du banquier Charles."""
+    cursor = connection.cursor(dictionary=True)
+    
+    # Trouver le banquier
+    cursor.execute("SELECT id FROM users WHERE email = 'banker1@bank.com'")
+    banker = cursor.fetchone()
+    if not banker:
+        cursor.close()
+        return
+        
+    # Trouver Alice et Bob
+    cursor.execute("SELECT id FROM users WHERE email IN ('alice@bank.com', 'bob@bank.com')")
+    clients = cursor.fetchall()
+    
+    assigned: int = 0
+    for client in clients:
+        cursor.execute(
+            "SELECT id FROM banker_clients WHERE client_id = %s", (client['id'],)
+        )
+        if cursor.fetchone():
+            continue
+            
+        cursor.execute(
+            "INSERT INTO banker_clients (banker_id, client_id) VALUES (%s, %s)",
+            (banker['id'], client['id'])
+        )
+        assigned = assigned + 1  # type: ignore
+            
+    connection.commit()
+    cursor.close()
+    if assigned > 0:
+        print(f" {assigned} clients assignes a Charles le banquier !")
+
 if __name__ == '__main__':
     conn = connect_to_db()
     seed_users(conn)
+    seed_bankers(conn)
     seed_transactions(conn)
     conn.close()

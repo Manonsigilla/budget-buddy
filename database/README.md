@@ -23,12 +23,23 @@
 
 | Table | Description | Lignes clés |
 |-------|-------------|-------------|
-| `users` | Comptes utilisateurs | email, password_hash, balance |
+| `users` | Comptes utilisateurs | email, password_hash, balance, account_type, created_at, is_active |
 | `categories` | Catégories de virements | name, icon_code, color_hex |
 | `virements` | Historique des transferts | sender_id, receiver_id, amount, status |
 | `notifications` | Notifications utilisateur | user_id, type, is_read |
 | `audit_logs` | Journal des actions | user_id, action, details (JSON) |
+| `banker_clients` | Relation banquier-client | banker_id, client_id |
 | `schema_migrations` | Suivi des migrations | migration_name, applied_at |
+
+### `banker_clients`
+Table de relation associant un banquier à son portefeuille de clients.
+
+| Column | Type | Constraints |
+|--------|------|-------------|
+| `id` | `INT` | `PK, AUTO_INCREMENT` |
+| `banker_id` | `INT` | `NOT NULL, FK -> users.id (CASCADE)` |
+| `client_id` | `INT` | `NOT NULL, UNIQUE, FK -> users.id (CASCADE)` |
+| `assigned_at` | `TIMESTAMP` | `DEFAULT CURRENT_TIMESTAMP` |
 
 ### Contraintes de sécurité
 
@@ -44,7 +55,9 @@ users ──< virements >── users
            │
            └── categories
            
-users ──< notifications >── virements
+users ──< notifications
+virements >-- categories
+users ──< banker_clients >── users
 
 users ──< audit_logs
 ```
@@ -68,6 +81,7 @@ docker exec -it banking_app_api python /database/seed_users.py
 | `alice@bank.com` | `password123` | user |
 | `bob@bank.com` | `password123` | user |
 | `admin@bank.com` | `adminpass123` | admin |
+| `banker@bank.com` | `bankerpass123` | banker |
 
 ---
 
