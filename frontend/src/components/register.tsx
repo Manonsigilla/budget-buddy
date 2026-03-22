@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import '../styles/components/form.css';
 import '../styles/components/card.css';
+import { validatePassword } from '../utils/passwordValidator';
 
 interface RegisterData {
     first_name: string;
@@ -40,8 +41,9 @@ export default function Register() {
             return;
         }
 
-        if (formData.password.length < 8) {
-            setError('Le mot de passe doit contenir au moins 8 caractères');
+        const validation = validatePassword(formData.password);
+        if (!validation.isValid) {
+            setError('Mot de passe faible:\n' + validation.errors.join('\n'));
             return;
         }
 
