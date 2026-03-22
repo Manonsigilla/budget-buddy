@@ -1,0 +1,37 @@
+.transfers-page {
+    min-height: calc(100vh - 80px);
+    padding: var(--spacing-lg);
+    background: linear-gradient(135deg, var(--background) 0%, var(--secondary-accent) 100%);
+}
+
+.transfers-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.transfers-container h1 {
+    color: var(--current-text-primary);
+    margin-bottom: var(--spacing-2xl);
+}
+
+.transfers-card {
+    padding: var(--spacing-2xl);
+}
+
+.transfers-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: calc(100vh - 200px);
+    color: var(--current-text-secondary);
+}
+
+@media (max-width: 768px) {
+    .transfers-page {
+        padding: var(--spacing-md);
+    }
+
+    .transfers-container h1 {
+        font-size: var(--font-size-2xl);
+    }
+}
