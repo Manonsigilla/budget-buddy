@@ -195,3 +195,25 @@ def get_virements_by_user(user_id, filters=None):
         v['created_at'] = str(v['created_at'])
 
     return virements
+
+def get_categories_with_names():
+    """
+    Récupère toutes les catégories avec leurs noms.
+    Retourne une liste de dictionnaires {id, name}.
+    """
+    db = get_db_connection()
+    if not db:
+        return []
+
+    try:
+        cursor = db.cursor(dictionary=True)
+        cursor.execute("SELECT id, name FROM categories ORDER BY name")
+        categories = cursor.fetchall()
+        cursor.close()
+        db.close()
+        return categories
+    except Exception as e:
+        print(f"Erreur récupération catégories: {e}")
+        cursor.close()
+        db.close()
+        return []

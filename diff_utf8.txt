@@ -1,0 +1,54 @@
+﻿diff --git a/backend/models/virement.py b/backend/models/virement.py
+index 0a828e2..4782def 100644
+--- a/backend/models/virement.py
++++ b/backend/models/virement.py
+@@ -195,3 +195,25 @@ def get_virements_by_user(user_id, filters=None):
+         v['created_at'] = str(v['created_at'])
+ 
+     return virements
++
++def get_categories_with_names():
++    """
++    R├®cup├¿re toutes les cat├®gories avec leurs noms.
++    Retourne une liste de dictionnaires {id, name}.
++    """
++    db = get_db_connection()
++    if not db:
++        return []
++
++    try:
++        cursor = db.cursor(dictionary=True)
++        cursor.execute("SELECT id, name FROM categories ORDER BY name")
++        categories = cursor.fetchall()
++        cursor.close()
++        db.close()
++        return categories
++    except Exception as e:
++        print(f"Erreur r├®cup├®ration cat├®gories: {e}")
++        cursor.close()
++        db.close()
++        return []
+\ No newline at end of file
+diff --git a/backend/routes/virements.py b/backend/routes/virements.py
+index 103d72a..09aa635 100644
+--- a/backend/routes/virements.py
++++ b/backend/routes/virements.py
+@@ -118,4 +118,17 @@ def get_transfers():
+     virements = get_virements_by_user(user_id, _get_filters_from_request())
+     return jsonify(virements), 200
+ 
+-
++@virements_bp.route('/categories', methods=['GET'])
++@jwt_required()
++def get_categories():
++    """
++    Retourne la liste de toutes les cat├®gories de virements.
++    """
++    from models.virement import get_categories_with_names
++    
++    categories = get_categories_with_names()
++    
++    return jsonify([{
++        "id": cat['id'],
++        "name": cat['name']
++    } for cat in categories]), 200

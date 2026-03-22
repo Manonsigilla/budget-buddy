@@ -149,6 +149,8 @@ export default function Analytics({ transfers, currentUserId, onClose }: Analyti
         'rgba(220, 53, 69, 0.7)',
         'rgba(40, 167, 69, 0.7)',
         'rgba(255, 193, 7, 0.7)',
+        'rgba(52, 152, 219, 0.7)',
+        'rgba(155, 89, 182, 0.7)',
     ];
 
     const byCategoryData = {
@@ -157,7 +159,9 @@ export default function Analytics({ transfers, currentUserId, onClose }: Analyti
             {
                 data: categoryKeys.map((cat) => analytics.byCategory[cat]),
                 backgroundColor: categoryColors.slice(0, categoryKeys.length),
-                borderColor: categoryColors.slice(0, categoryKeys.length).map((c) => c.replace('0.7', '1')),
+                borderColor: categoryColors
+                    .slice(0, categoryKeys.length)
+                    .map((c) => c.replace('0.7', '1')),
                 borderWidth: 2,
             },
         ],
