@@ -9,6 +9,7 @@ import '../styles/components/form.css';
 import '../styles/components/table.css';
 import '../styles/components/button.css';
 import '../styles/components/dashboard.css';
+import Analytics from './Analytics';
 import TransferFilter from './TransferFilter';
 
 interface UserData {
@@ -39,6 +40,7 @@ export default function Dashboard() {
         amount: '',
         description: '',
     });
+    const [showAnalytics, setShowAnalytics] = useState(false);
 
     useEffect(() => {
         resetFilters();
@@ -242,7 +244,16 @@ export default function Dashboard() {
 
                 {/* HISTORIQUE */}
                 <div className="card card-glass dashboard-history">
-                    <h2>Historique des virements</h2>
+                    <div className="dashboard-history-header">
+                        <h2>Historique des virements</h2>
+                        <button
+                            className="btn btn-sm btn-secondary"
+                            onClick={() => setShowAnalytics(true)}
+                            title="Afficher les graphiques"
+                        >
+                            <i className="fas fa-chart-bar"></i>
+                        </button>
+                    </div>
 
                     {transfersLoading ? (
                         <p className="empty-state">
@@ -288,6 +299,15 @@ export default function Dashboard() {
                         </div>
                     )}
                 </div>
+
+                {/* MODAL ANALYTICS */}
+                {showAnalytics && (
+                    <Analytics
+                        transfers={transfers}
+                        currentUserId={currentUser.id}
+                        onClose={() => setShowAnalytics(false)}
+                    />
+                )}
             </div>
         </div>
     );

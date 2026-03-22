@@ -48,7 +48,7 @@ services:
         - "3000:3000"
       volumes:
         - ./frontend:/app
-        - /app/node_modules  # <-- LA LIGNE MAGIQUE EST ICI
+        - /app/node_modules 
       networks:
         - banking_network
 
