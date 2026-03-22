@@ -17,6 +17,8 @@ services:
       - ./database/migrations/002_add_notifications.sql:/docker-entrypoint-initdb.d/04-migration-002.sql
       - ./database/migrations/003_add_categories.sql:/docker-entrypoint-initdb.d/05-migration-003.sql
       - ./database/migrations/004_add_banker_system.sql:/docker-entrypoint-initdb.d/06-migration-004.sql
+      - ./database/migrations/005_create_transfers_view.sql:/docker-entrypoint-initdb.d/07-migration-005.sql
+      - ./database/migrations/006_create_messages_table.sql:/docker-entrypoint-initdb.d/08-migration-006.sql
       - mysql_data:/var/lib/mysql
     networks:
       - banking_network

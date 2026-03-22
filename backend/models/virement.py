@@ -134,14 +134,12 @@ def get_virements_by_user(user_id, filters=None):
     if filters is None:
         filters = {}
 
-    # Construction de la requête avec filtres dynamiques
-    query = """SELECT v.id, v.amount, v.description, v.reference_number, v.status, v.created_at,
-                      v.category_id,
-                      s.id as sender_id, s.first_name as sender_first, s.last_name as sender_last,
-                      r.id as receiver_id, r.first_name as receiver_first, r.last_name as receiver_last
-               FROM virements v
-               JOIN users s ON v.sender_id = s.id
-               JOIN users r ON v.receiver_id = r.id
+    # Construction de la requête avec filtres dynamiques basés sur la NOUVELLE VUE
+    query = """SELECT virement_id AS id, amount, description, reference_number, status, created_at,
+                      category_id, category_name, category_icon, category_color,
+                      sender_id, sender_first_name AS sender_first, sender_last_name AS sender_last,
+                      receiver_id, receiver_first_name AS receiver_first, receiver_last_name AS receiver_last
+               FROM v_virements_details v
                WHERE """
 
     params = []
