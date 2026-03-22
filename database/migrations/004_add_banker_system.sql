@@ -17,4 +17,4 @@ CREATE TABLE IF NOT EXISTS banker_clients (
 );
 
 -- Étape 3 : Enregistrer la migration dans schema_migrations
-INSERT IGNORE INTO schema_migrations (migration_name) VALUES ('004_add_banker_role');
+INSERT IGNORE INTO schema_migrations (migration_name) VALUES ('004_add_banker_system');
