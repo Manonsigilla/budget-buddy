@@ -101,9 +101,39 @@ CREATE TABLE IF NOT EXISTS banker_clients (
 
 SET FOREIGN_KEY_CHECKS=1;
 
+-- ============================================
+-- VUES (VIEWS)
+-- ============================================
+CREATE OR REPLACE VIEW v_virements_details AS
+SELECT 
+    v.id AS virement_id,
+    v.amount,
+    v.description,
+    v.reference_number,
+    v.status,
+    v.created_at,
+    v.executed_at,
+    s.id AS sender_id,
+    s.username AS sender_username,
+    s.first_name AS sender_first_name,
+    s.last_name AS sender_last_name,
+    r.id AS receiver_id,
+    r.username AS receiver_username,
+    r.first_name AS receiver_first_name,
+    r.last_name AS receiver_last_name,
+    c.id AS category_id,
+    c.name AS category_name,
+    c.icon_code AS category_icon,
+    c.color_hex AS category_color
+FROM virements v
+JOIN users s ON v.sender_id = s.id
+JOIN users r ON v.receiver_id = r.id
+LEFT JOIN categories c ON v.category_id = c.id;
+
 -- Enregistrement des migrations initiales
 INSERT IGNORE INTO schema_migrations (migration_name) VALUES
 ('001_create_tables'),
 ('002_add_notifications'),
 ('003_add_categories'),
-('004_add_banker_system');
+('004_add_banker_system'),
+('005_create_transfers_view');
