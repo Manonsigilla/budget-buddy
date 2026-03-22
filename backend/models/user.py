@@ -147,3 +147,32 @@ def find_all_users():
     cursor.close()
     db.close()
     return users
+
+def delete_user(user_id):
+    """
+    Supprime un utilisateur de la base de données.
+    Supprime aussi tous ses virements et notifications associés.
+    Retourne True si la suppression a réussi, False sinon.
+    """
+    db = get_db_connection()
+    if not db:
+        return False
+
+    try:
+        cursor = db.cursor()
+
+        cursor.execute("DELETE FROM notifications WHERE user_id = %s", (user_id,))
+        cursor.execute("DELETE FROM virements WHERE sender_id = %s OR receiver_id = %s", (user_id, user_id))
+        cursor.execute("DELETE FROM banker_clients WHERE banker_id = %s OR client_id = %s", (user_id, user_id))
+        cursor.execute("DELETE FROM users WHERE id = %s", (user_id,))
+
+        db.commit()
+        cursor.close()
+        db.close()
+        return True
+    except Exception as e:
+        print(f"Erreur suppression utilisateur: {e}")
+        db.rollback()
+        cursor.close()
+        db.close()
+        return False

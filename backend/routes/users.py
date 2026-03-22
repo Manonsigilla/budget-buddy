@@ -4,7 +4,7 @@
 import re
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models.user import find_user_by_id, find_user_by_email, update_user, update_password, find_all_users
+from models.user import find_user_by_id, find_user_by_email, update_user, update_password, find_all_users, delete_user
 
 users_bp = Blueprint('users', __name__)
 
@@ -111,3 +111,20 @@ def get_all_users():
         "last_name": user['last_name'],
         "balance": float(user['balance'])
     } for user in users]), 200
+    
+    
+@users_bp.route('/users/me', methods=['DELETE'])
+@jwt_required()
+def delete_me():
+    """
+    Supprime le compte de l'utilisateur connecté.
+    Cette action est irréversible.
+    Tous les virements et notifications associés sont aussi supprimés.
+    """
+    user_id = get_jwt_identity()
+
+    success = delete_user(user_id)
+    if not success:
+        return jsonify({"error": "Erreur lors de la suppression du compte"}), 500
+
+    return jsonify({"message": "Compte supprimé avec succès"}), 200
