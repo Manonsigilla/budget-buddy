@@ -3,7 +3,8 @@
 # et enregistre les blueprints (groupes de routes).
 
 import os
-from flask import Flask
+from datetime import timedelta
+from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from routes.health import health_bp
@@ -30,9 +31,26 @@ CORS(app, resources={
 # Ne jamais mettre ces valeurs en dur dans le code en production
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key')
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'dev-jwt-secret-key')
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=15)
 
 # Initialisation du gestionnaire de tokens JWT
-JWTManager(app)
+jwt = JWTManager(app)
+
+# Gestion explicite des erreurs JWT — retourne du JSON propre au lieu d'une erreur HTML
+@jwt.expired_token_loader
+def expired_token_callback(_jwt_header, _jwt_payload):
+    """Token expiré — le frontend doit rediriger vers la page de login."""
+    return jsonify({"error": "Token expiré, veuillez vous reconnecter", "code": "token_expired"}), 401
+
+@jwt.invalid_token_loader
+def invalid_token_callback(_error):
+    """Token invalide ou malformé."""
+    return jsonify({"error": "Token invalide", "code": "token_invalid"}), 401
+
+@jwt.unauthorized_loader
+def missing_token_callback(_error):
+    """Aucun token fourni."""
+    return jsonify({"error": "Token manquant, authentification requise", "code": "token_missing"}), 401
 
 # Enregistrement des blueprints (routes groupées par fonctionnalité)
 app.register_blueprint(health_bp)
