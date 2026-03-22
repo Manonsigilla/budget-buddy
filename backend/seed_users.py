@@ -111,7 +111,7 @@ def seed_users(connection):
 
         if existing:
             print(f"{user['username']} ({user['email']}) existe deja -> ignore")
-            skipped = skipped + 1  # type: ignore
+            skipped = skipped + 1
             continue
 
         # Hasher le mot de passe
@@ -125,7 +125,7 @@ def seed_users(connection):
              user['first_name'], user['last_name'], user['balance'], user['account_type'])
         )
         print(f"{user['username']} ({user['email']}) cree avec succes")
-        inserted = inserted + 1  # type: ignore
+        inserted = inserted + 1
 
     connection.commit()
     cursor.close()
@@ -186,11 +186,11 @@ def seed_transactions(connection):
         
         # Montants logiques selon la categorie
         if cat_name == 'Salaire':
-            amount = float(f"{random.uniform(1500, 3500):.2f}")
+            amount = round(random.uniform(1500, 3500), 2)
         elif cat_name == 'Alimentation':
-            amount = float(f"{random.uniform(10, 150):.2f}")
+            amount = round(random.uniform(10, 150), 2)
         else:
-            amount = float(f"{random.uniform(5, 200):.2f}")
+            amount = round(random.uniform(5, 200), 2)
             
         # Date aleatoire dans les 6 derniers mois
         days_ago = random.randint(1, 180)
