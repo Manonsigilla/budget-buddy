@@ -15,3 +15,6 @@
 @import './styles/components/transfer-filter.css';
 @import './styles/components/analytics.css';
 @import './styles/components/alert-bar.css';
+@import './styles//pages/profile.css';
+@import './styles/pages/settings.css';
+@import './styles/pages/transfers.css';
