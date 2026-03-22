@@ -18,15 +18,36 @@ export const useCreateTransfer = () => {
         setSuccess(false);
 
         try {
-        await api.post('/transfers', data);
-        setSuccess(true);
-        return true;
+            if (!data.receiver_id || !data.amount) {
+                setError('Tous les champs requis doivent être remplis');
+                return false;
+            }
+
+            if (data.amount <= 0) {
+                setError('Le montant doit être supérieur à 0');
+                return false;
+            }
+
+            await api.post('/transfers', data);
+            setSuccess(true);
+            return true;
         } catch (err: any) {
-        const errorMessage = err.response?.data?.message || 'Erreur lors de la création du virement';
-        setError(errorMessage);
-        return false;
+            if (err.response?.status === 400) {
+                setError(err.response?.data?.message || 'Données invalides');
+            } else if (err.response?.status === 401) {
+                setError('Vous n\'êtes pas authentifié');
+            } else if (err.response?.status === 403) {
+                setError('Solde insuffisant pour effectuer ce virement');
+            } else if (err.response?.status === 404) {
+                setError('Destinataire non trouvé');
+            } else if (err.response?.status === 500) {
+                setError('Erreur serveur. Veuillez réessayer ultérieurement');
+            } else {
+                setError(err.response?.data?.message || 'Erreur lors de la création du virement');
+            }
+            return false;
         } finally {
-        setIsLoading(false);
+            setIsLoading(false);
         }
     };
 
