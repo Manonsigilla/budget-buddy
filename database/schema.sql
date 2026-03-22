@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS users (
     first_name VARCHAR(100),
     last_name VARCHAR(100),
     balance DECIMAL(15, 2) DEFAULT 0,
-    account_type ENUM('user', 'admin') DEFAULT 'user',
+    account_type ENUM('user', 'admin', 'banker') DEFAULT 'user',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     is_active BOOLEAN DEFAULT TRUE,
     INDEX idx_email (email),
@@ -89,10 +89,21 @@ CREATE TABLE IF NOT EXISTS audit_logs (
     INDEX idx_created_at (created_at)
 );
 
+CREATE TABLE IF NOT EXISTS banker_clients (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    banker_id INT NOT NULL,
+    client_id INT NOT NULL UNIQUE,
+    assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (banker_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (client_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_banker (banker_id)
+);
+
 SET FOREIGN_KEY_CHECKS=1;
 
 -- Enregistrement des migrations initiales
 INSERT IGNORE INTO schema_migrations (migration_name) VALUES
 ('001_create_tables'),
 ('002_add_notifications'),
-('003_add_categories');
+('003_add_categories'),
+('004_add_banker_role');

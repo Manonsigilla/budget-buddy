@@ -16,6 +16,7 @@ services:
       - ./database/migrations/001_create_tables.sql:/docker-entrypoint-initdb.d/03-migration-001.sql
       - ./database/migrations/002_add_notifications.sql:/docker-entrypoint-initdb.d/04-migration-002.sql
       - ./database/migrations/003_add_categories.sql:/docker-entrypoint-initdb.d/05-migration-003.sql
+      - ./database/migrations/004_add_banker_role.sql:/docker-entrypoint-initdb.d/06-migration-004.sql
       - mysql_data:/var/lib/mysql
     networks:
       - banking_network
