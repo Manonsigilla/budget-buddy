@@ -13,6 +13,8 @@ import hashlib
 import os
 import sys
 import time
+import random
+from datetime import datetime, timedelta
 
 try:
     import mysql.connector
@@ -96,9 +98,8 @@ def connect_to_db():
     sys.exit(1)
 
 
-def seed_users():
+def seed_users(connection):
     """Insere les utilisateurs de test avec de vrais hash de mots de passe."""
-    connection = connect_to_db()
     cursor = connection.cursor(dictionary=True)
     inserted: int = 0
     skipped: int = 0
@@ -110,7 +111,7 @@ def seed_users():
 
         if existing:
             print(f"{user['username']} ({user['email']}) existe deja -> ignore")
-            skipped = skipped + 1
+            skipped = skipped + 1  # type: ignore
             continue
 
         # Hasher le mot de passe
@@ -124,17 +125,96 @@ def seed_users():
              user['first_name'], user['last_name'], user['balance'], user['account_type'])
         )
         print(f"{user['username']} ({user['email']}) cree avec succes")
-        inserted = inserted + 1
+        inserted = inserted + 1  # type: ignore
 
     connection.commit()
     cursor.close()
-    connection.close()
 
     print(f"\nSeed termine : {inserted} cree(s), {skipped} ignore(s)")
     print("Mots de passe de test :")
     for user in TEST_USERS:
         print(f"   - {user['email']} -> {user['password']}")
 
+def seed_transactions(connection):
+    """Genere des dizaines de virements aleatoires pour peupler l'historique."""
+    cursor = connection.cursor(dictionary=True)
+    
+    # Recuperer les utilisateurs et categories
+    cursor.execute("SELECT id, username FROM users")
+    users = cursor.fetchall()
+    
+    cursor.execute("SELECT id, name FROM categories")
+    categories = cursor.fetchall()
+    
+    if len(users) < 2 or len(categories) == 0:
+        print(" Pas assez d'utilisateurs ou de categories pour generer des virements.")
+        cursor.close()
+        return
+
+    # Verifier s'il y a deja beaucoup de virements
+    cursor.execute("SELECT COUNT(*) as count FROM virements")
+    if cursor.fetchone()['count'] > 5:
+        print("\n Virements deja generes precedemment -> generation ignoree")
+        cursor.close()
+        return
+
+    print("\n Generation de 50 transactions aleatoires dans le passe...")
+    
+    descriptions = {
+        'Loisirs': ['Cinema', 'Restaurant entre amis', 'Concert', 'Abonnement Netflix', 'Jeux video'],
+        'Électricité': ['Facture EDF', 'Regul electricite'],
+        'Alimentation': ['Courses Carrefour', 'Boulangerie', 'Boucher', 'Marche au legumes'],
+        'Salaire': ['Salaire', 'Prime exceptionnelle', 'Remboursement frais pro'],
+        'Autre': ['Remboursement cadeau', 'Achat LeBonCoin', 'Don', 'Virement compte joint']
+    }
+    
+    inserted_tx = 0
+    now = datetime.now()
+    
+    for _ in range(50):
+        sender = random.choice(users)
+        receiver = random.choice(users)
+        while receiver['id'] == sender['id']:
+            receiver = random.choice(users)
+            
+        category = random.choice(categories)
+        cat_name = category['name']
+        
+        # Si la categorie n'est pas dans le dico (ex: 'Loisirs' vs 'Entertainment'), on prend 'Autre'
+        desc_list = descriptions.get(cat_name, descriptions['Autre'])
+        description = random.choice(desc_list)
+        
+        # Montants logiques selon la categorie
+        if cat_name == 'Salaire':
+            amount = float(f"{random.uniform(1500, 3500):.2f}")
+        elif cat_name == 'Alimentation':
+            amount = float(f"{random.uniform(10, 150):.2f}")
+        else:
+            amount = float(f"{random.uniform(5, 200):.2f}")
+            
+        # Date aleatoire dans les 6 derniers mois
+        days_ago = random.randint(1, 180)
+        created_at = now - timedelta(days=days_ago, hours=random.randint(0, 23), minutes=random.randint(0, 59))
+        
+        status = random.choice(['completed', 'completed', 'completed', 'pending'])
+        executed_at = created_at + timedelta(hours=random.randint(1, 48)) if status == 'completed' else None
+        
+        # Reference unique basee sur timestamp et un random
+        ref = f"VIR-{int(created_at.timestamp())}-{random.randint(100, 999)}"
+        
+        cursor.execute(
+            """INSERT IGNORE INTO virements (sender_id, receiver_id, amount, category_id, description, reference_number, status, created_at, executed_at)
+               VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+            (sender['id'], receiver['id'], amount, category['id'], description, ref, status, created_at, executed_at)
+        )
+        inserted_tx += 1
+        
+    connection.commit()
+    cursor.close()
+    print(f" {inserted_tx} virements aleatoires generes avec succes !")
 
 if __name__ == '__main__':
-    seed_users()
+    conn = connect_to_db()
+    seed_users(conn)
+    seed_transactions(conn)
+    conn.close()
