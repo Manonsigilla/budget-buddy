@@ -1,6 +1,8 @@
-#  Config de base
+# Configuration de la base de données.
+# Les valeurs sont lues depuis les variables d'environnement Docker
+# définies dans docker-compose.yml. Les valeurs par défaut sont
+# uniquement là pour le développement local sans Docker.
 
-# backend/config.py
 import os
 from dotenv import load_dotenv
 

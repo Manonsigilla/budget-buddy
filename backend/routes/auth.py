@@ -1,8 +1,38 @@
+# Routes d'authentification : inscription et connexion.
+# Les tokens JWT générés au login sont ensuite utilisés
+# pour accéder aux routes protégées (Phase 3).
+
+import re
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token
 from models.user import find_user_by_email, find_user_by_username, create_user, verify_password
 
 auth_bp = Blueprint('auth', __name__)
+
+def is_valid_email(email):
+    """Vérifie que l'email contient un @ et un domaine valide (ex: alice@test.com)."""
+    return re.match(r'^[^@]+@[^@]+\.[^@]+$', email) is not None
+
+def is_valid_password(password):
+    """
+    Vérifie que le mot de passe respecte les règles de sécurité :
+    - Au moins 10 caractères
+    - Au moins une majuscule
+    - Au moins une minuscule
+    - Au moins un chiffre
+    - Au moins un caractère spécial
+    """
+    if len(password) < 10:
+        return False, "Le mot de passe doit contenir au moins 10 caractères"
+    if not re.search(r'[A-Z]', password):
+        return False, "Le mot de passe doit contenir au moins une majuscule"
+    if not re.search(r'[a-z]', password):
+        return False, "Le mot de passe doit contenir au moins une minuscule"
+    if not re.search(r'[0-9]', password):
+        return False, "Le mot de passe doit contenir au moins un chiffre"
+    if not re.search(r'[^A-Za-z0-9]', password):
+        return False, "Le mot de passe doit contenir au moins un caractère spécial"
+    return True, None
 
 @auth_bp.route('/auth/register', methods=['POST'])
 def register():
@@ -13,6 +43,15 @@ def register():
     for field in required:
         if not data or not data.get(field):
             return jsonify({"error": f"Le champ '{field}' est requis"}), 400
+
+    # Validation du format email
+    if not is_valid_email(data['email']):
+        return jsonify({"error": "Format d'email invalide"}), 400
+
+    # Validation de la complexité du mot de passe
+    valid, error_msg = is_valid_password(data['password'])
+    if not valid:
+        return jsonify({"error": error_msg}), 400
 
     # Vérifier que l'email ou username n'existe pas déjà
     if find_user_by_email(data['email']):
@@ -43,6 +82,8 @@ def login():
 
     user = find_user_by_email(data['email'])
 
+    # On retourne intentionnellement le même message pour email et mot de passe incorrect.
+    # Cela évite d'indiquer à un attaquant si l'email existe en base de données.
     if not user or not verify_password(data['password'], user['password_hash']):
         return jsonify({"error": "Email ou mot de passe incorrect"}), 401
 

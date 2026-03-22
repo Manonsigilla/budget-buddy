@@ -1,0 +1,87 @@
+/* ========== TABLEAUX ========== */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--current-bg-secondary);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+}
+
+thead {
+    background: rgba(118, 79, 105, 0.1);
+    border-bottom: 2px solid var(--current-border-color);
+}
+
+thead th {
+    padding: var(--spacing-md);
+    text-align: left;
+    font-weight: var(--font-weight-bold);
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+tbody td {
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--current-border-color);
+    color: var(--text-secondary);
+}
+
+tbody tr {
+    transition: all var(--transition-base);
+}
+
+tbody tr:hover {
+    background: rgba(118, 79, 105, 0.05);
+}
+
+tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* ========== STYLES DE STATUT ========== */
+.status-badge {
+    display: inline-block;
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-badge.completed {
+    background: rgba(40, 167, 69, 0.2);
+    color: #28a745;
+    border: 1px solid rgba(40, 167, 69, 0.4);
+}
+
+.status-badge.pending {
+    background: rgba(255, 193, 7, 0.2);
+    color: #ffc107;
+    border: 1px solid rgba(255, 193, 7, 0.4);
+}
+
+.status-badge.failed {
+    background: rgba(220, 53, 69, 0.2);
+    color: #dc3545;
+    border: 1px solid rgba(220, 53, 69, 0.4);
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 767px) {
+    table {
+        font-size: var(--font-size-sm);
+    }
+
+    thead th,
+    tbody td {
+        padding: var(--spacing-sm);
+    }
+
+    thead th {
+        font-size: var(--font-size-xs);
+    }
+}
