@@ -1,0 +1,105 @@
+/* ========== TRANSFER FILTER CONTAINER ========== */
+
+.transfer-filter-header {
+    margin-bottom: var(--spacing-lg);
+}
+
+.transfer-filter-title {
+    color: var(--current-text-primary);
+    margin: 0;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+/* ========== FORM LAYOUT ========== */
+.transfer-filter-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.filter-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-md);
+}
+
+.filter-row-advanced {
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid var(--current-border-color);
+    margin-top: var(--spacing-md);
+}
+
+/* ========== FILTER TOGGLE ========== */
+.filter-toggle-btn {
+    background: transparent;
+    border: none;
+    color: var(--primary-accent);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    padding: var(--spacing-xs) 0;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    transition: color var(--transition-base);
+    font-weight: var(--font-weight-medium);
+}
+
+.filter-toggle-btn:hover {
+    color: var(--primary-accent);
+    opacity: 0.8;
+}
+
+.filter-toggle-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ========== FILTER HINT ========== */
+.filter-hint {
+    font-size: var(--font-size-xs);
+    color: var(--current-text-tertiary);
+    margin-top: var(--spacing-xs);
+    margin-bottom: 0;
+    font-style: italic;
+}
+
+/* ========== FILTER ACTIONS ========== */
+.filter-actions {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+}
+
+.filter-btn-apply,
+.filter-btn-reset {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    font-size: var(--font-size-base);
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+    .transfer-filter-container {
+        padding: var(--spacing-md);
+    }
+
+    .filter-row {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-actions {
+        flex-direction: column;
+    }
+
+    .filter-btn-apply,
+    .filter-btn-reset {
+        width: 100%;
+    }
+}

@@ -11,3 +11,5 @@
 @import './styles/components/theme-toggle.css';
 @import './styles/components/table.css';
 @import './styles/components/modal.css';
+@import './styles/components/dashboard.css';
+@import './styles/components/transfer-filter.css';
