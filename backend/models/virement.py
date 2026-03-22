@@ -183,15 +183,45 @@ def get_virements_by_user(user_id, filters=None):
     else:
         query += " ORDER BY v.created_at DESC"
 
-    cursor = db.cursor(dictionary=True)
-    cursor.execute(query, params)
-    virements = cursor.fetchall()
-    cursor.close()
-    db.close()
+    cursor = None
+    try:
+        cursor = db.cursor(dictionary=True)
+        cursor.execute(query, params)
+        virements = cursor.fetchall()
+        
+        # Convertir les types non sérialisables en JSON
+        for v in virements:
+            v['amount'] = float(v['amount'])
+            v['created_at'] = str(v['created_at'])
+            
+        return virements
+    except Exception as e:
+        print(f"Erreur récupération virements: {e}")
+        return []
+    finally:
+        if cursor:
+            cursor.close()
+        db.close()
 
-    # Convertir les types non sérialisables en JSON
-    for v in virements:
-        v['amount'] = float(v['amount'])
-        v['created_at'] = str(v['created_at'])
+def get_categories_with_names():
+    """
+    Récupère toutes les catégories avec leurs noms.
+    Retourne une liste de dictionnaires {id, name}.
+    """
+    db = get_db_connection()
+    if not db:
+        return []
 
-    return virements
+    cursor = None
+    try:
+        cursor = db.cursor(dictionary=True)
+        cursor.execute("SELECT id, name FROM categories ORDER BY name")
+        categories = cursor.fetchall()
+        return categories
+    except Exception as e:
+        print(f"Erreur récupération catégories: {e}")
+        return []
+    finally:
+        if cursor:
+            cursor.close()
+        db.close()

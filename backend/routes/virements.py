@@ -118,4 +118,17 @@ def get_transfers():
     virements = get_virements_by_user(user_id, _get_filters_from_request())
     return jsonify(virements), 200
 
-
+@virements_bp.route('/virements/categories', methods=['GET'])
+@jwt_required()
+def get_categories():
+    """
+    Retourne la liste de toutes les catégories de virements.
+    """
+    from models.virement import get_categories_with_names
+    
+    categories = get_categories_with_names()
+    
+    return jsonify([{
+        "id": cat['id'],
+        "name": cat['name']
+    } for cat in categories]), 200

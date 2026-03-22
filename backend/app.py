@@ -28,6 +28,27 @@ CORS(app, resources={
     }
 })
 
+# Gestionnaire d'erreurs global pour éviter les erreurs CORS (null) lors des 500
+@app.errorhandler(Exception)
+def handle_exception(e):
+    """Capture toutes les erreurs non gérées et retourne du JSON avec les bons headers."""
+    # Log de l'erreur pour le debug Docker
+    app.logger.error(f"Erreur non gérée: {str(e)}")
+    
+    # Prépare la réponse JSON
+    response = jsonify({
+        "error": "Une erreur interne est survenue",
+        "message": str(e),
+        "code": 500
+    })
+    
+    # Assure que les headers CORS sont présents même en cas d'erreur
+    # Flask-CORS le fait normalement, mais un crash brutal peut parfois le bypasser
+    response.headers.add("Access-Control-Allow-Origin", "http://localhost:3000")
+    response.headers.add("Access-Control-Allow-Credentials", "true")
+    
+    return response, 500
+
 # Clés secrètes chargées depuis les variables d'environnement Docker
 # Ne jamais mettre ces valeurs en dur dans le code en production
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key')

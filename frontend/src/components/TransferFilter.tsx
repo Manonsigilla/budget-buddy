@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import '../styles/components/transfer-filter.css';
 import '../styles/components/card.css';
+import { useCategories } from '../hooks/useCategories';
 
 interface Filters {
     date?: string;
@@ -22,6 +23,7 @@ export default function TransferFilter({
     onResetFilters,
     isLoading = false,
 }: TransferFilterProps) {
+    const { categories, isLoading: categoriesLoading } = useCategories();
     const [filters, setFilters] = useState<Filters>({});
     const [showAdvanced, setShowAdvanced] = useState(false);
 
@@ -143,17 +145,21 @@ export default function TransferFilter({
 
                         <div className="form-group">
                             <label htmlFor="category_id">Catégorie</label>
-                            <input
+                            <select
                                 id="category_id"
-                                type="number"
                                 name="category_id"
-                                placeholder="ID de la catégorie"
                                 value={filters.category_id || ''}
                                 onChange={handleChange}
                                 className="input-neumorphic"
-                                disabled={isLoading}
-                            />
-                            <p className="filter-hint">À remplacer par un dropdown avec vraies catégories</p>
+                                disabled={isLoading || categoriesLoading}
+                            >
+                                <option value="">Toutes les catégories</option>
+                                {categories.map((cat) => (
+                                    <option key={cat.id} value={cat.id}>
+                                        {cat.name}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
                     </div>
                 )}
