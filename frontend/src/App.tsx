@@ -1,25 +1,43 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import Navbar from './components/Navbar';
+import AlertBar from './components/AlertBar';
 import Login from './components/login';
 import Register from './components/register';
 import Dashboard from './components/dashboard';
 import PrivateRoute from './components/PrivateRoute';
 import Home from './pages/Home';
 
+function AppContent() {
+    const { user } = useAuth();
+    const location = useLocation();
+
+    const showAlertBar = location.pathname !== '/login' && location.pathname !== '/register' && user;
+
+    return (
+        <>
+            <Navbar />
+            {showAlertBar && <AlertBar userBalance={user?.balance || 0} />}
+            <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+                <Route path="/transfers" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+                <Route path="/profile" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+                <Route path="/settings" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+            </Routes>
+        </>
+    );
+}
+
 function App() {
     return (
         <ThemeProvider>
             <AuthProvider>
                 <BrowserRouter>
-                    <Navbar />
-                    <Routes>
-                        <Route path="/" element={<Home />} />
-                        <Route path="/login" element={<Login />} />
-                        <Route path="/register" element={<Register />} />
-                        <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-                    </Routes>
+                    <AppContent />
                 </BrowserRouter>
             </AuthProvider>
         </ThemeProvider>
