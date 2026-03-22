@@ -24,6 +24,5 @@ CREATE TABLE IF NOT EXISTS banker_clients (
     FOREIGN KEY (client_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- Étape 3 : Ajouter un compte banquier de test
-INSERT INTO users (username, email, password_hash, first_name, last_name, balance, account_type)
-VALUES ('banker1', 'banker1@bank.com', 'PLACEHOLDER', 'Jean', 'Banquier', 0, 'banker');
+-- Étape 3 : Enregistrer la migration dans schema_migrations
+INSERT IGNORE INTO schema_migrations (migration_name) VALUES ('004_add_banker_system');

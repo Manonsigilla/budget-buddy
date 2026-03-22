@@ -106,4 +106,4 @@ INSERT IGNORE INTO schema_migrations (migration_name) VALUES
 ('001_create_tables'),
 ('002_add_notifications'),
 ('003_add_categories'),
-('004_add_banker_role');
+('004_add_banker_system');
