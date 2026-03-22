@@ -110,6 +110,24 @@ export default function Dashboard() {
                     </button>
                 </div>
 
+                {/* AFFICHAGE DES ERREURS */}
+                {(() => {
+                    const userError = null;
+                    const usersError = useUsers().error;
+                    const transfersError = null;
+                    
+                    const hasError = usersError || transfersError || userError;
+                    
+                    if (!hasError) return null;
+                    
+                    return (
+                        <div className="card-info error">
+                            <i className="fas fa-exclamation-triangle"></i>
+                            {usersError || transfersError || userError}
+                        </div>
+                    );
+                })()}
+
                 {/* INFOS UTILISATEUR */}
                 <div className="card card-glass dashboard-user-info">
                     <h2>Informations de compte</h2>
@@ -283,7 +301,7 @@ export default function Dashboard() {
                                             <td>#{transfer.id}</td>
                                             <td className={`amount ${transfer.sender_id === currentUser.id ? 'sent' : 'received'}`}>
                                                 {transfer.sender_id === currentUser.id ? '-' : '+'}
-                                                {transfer.amount.toFixed(2)} €
+                                                {parseFloat(transfer.amount).toFixed(2)} €
                                             </td>
                                             <td>
                                                 <span className={`status-badge ${transfer.status}`}>
