@@ -95,11 +95,13 @@ def change_password():
     return jsonify({"message": "Mot de passe mis à jour avec succès"}), 200
 
 @users_bp.route('/users', methods=['GET'])
+@jwt_required()
 def get_all_users():
     """
     Retourne la liste de tous les utilisateurs.
+    Route protégée — il faut être connecté pour accéder à la liste des utilisateurs.
     """
-    users = find_all_users()  # Utilise une fonction de la DB
+    users = find_all_users()
     
     return jsonify([{
         "id": user['id'],
