@@ -13,6 +13,27 @@ def is_valid_email(email):
     """Vérifie que l'email contient un @ et un domaine valide (ex: alice@test.com)."""
     return re.match(r'^[^@]+@[^@]+\.[^@]+$', email) is not None
 
+def is_valid_password(password):
+    """
+    Vérifie que le mot de passe respecte les règles de sécurité :
+    - Au moins 10 caractères
+    - Au moins une majuscule
+    - Au moins une minuscule
+    - Au moins un chiffre
+    - Au moins un caractère spécial
+    """
+    if len(password) < 10:
+        return False, "Le mot de passe doit contenir au moins 10 caractères"
+    if not re.search(r'[A-Z]', password):
+        return False, "Le mot de passe doit contenir au moins une majuscule"
+    if not re.search(r'[a-z]', password):
+        return False, "Le mot de passe doit contenir au moins une minuscule"
+    if not re.search(r'[0-9]', password):
+        return False, "Le mot de passe doit contenir au moins un chiffre"
+    if not re.search(r'[^A-Za-z0-9]', password):
+        return False, "Le mot de passe doit contenir au moins un caractère spécial"
+    return True, None
+
 @auth_bp.route('/auth/register', methods=['POST'])
 def register():
     data = request.json
@@ -27,9 +48,10 @@ def register():
     if not is_valid_email(data['email']):
         return jsonify({"error": "Format d'email invalide"}), 400
 
-    # Validation de la longueur du mot de passe
-    if len(data['password']) < 8:
-        return jsonify({"error": "Le mot de passe doit contenir au moins 8 caractères"}), 400
+    # Validation de la complexité du mot de passe
+    valid, error_msg = is_valid_password(data['password'])
+    if not valid:
+        return jsonify({"error": error_msg}), 400
 
     # Vérifier que l'email ou username n'existe pas déjà
     if find_user_by_email(data['email']):

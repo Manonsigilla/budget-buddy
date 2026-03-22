@@ -82,8 +82,11 @@ def change_password():
     if not data or not data.get('old_password') or not data.get('new_password'):
         return jsonify({"error": "Ancien et nouveau mot de passe requis"}), 400
 
-    if len(data['new_password']) < 8:
-        return jsonify({"error": "Le nouveau mot de passe doit contenir au moins 8 caractères"}), 400
+    # Import de la validation depuis auth.py
+    from routes.auth import is_valid_password
+    valid, error_msg = is_valid_password(data['new_password'])
+    if not valid:
+        return jsonify({"error": error_msg}), 400
 
     success = update_password(user_id, data['old_password'], data['new_password'])
     if not success:
