@@ -115,27 +115,78 @@ def create_virement(sender_id, receiver_id, amount, description=None, category_i
         return None, str(e)
 
 
-def get_virements_by_user(user_id):
+def get_virements_by_user(user_id, filters=None):
     """
-    Récupère l'historique des virements d'un utilisateur.
-    Retourne les virements envoyés ET reçus, triés du plus récent au plus ancien.
+    Récupère l'historique des virements d'un utilisateur avec filtres optionnels.
+
+    Filtres disponibles (dict) :
+    - date       : transactions d'une date précise (ex: "2026-03-22")
+    - date_start : date de début (ex: "2026-01-01")
+    - date_end   : date de fin   (ex: "2026-03-22")
+    - category_id: filtre par catégorie
+    - type       : "sent" (envoyés) ou "received" (reçus)
+    - sort       : "asc" ou "desc" par montant (défaut: date DESC)
     """
     db = get_db_connection()
     if not db:
         return []
 
+    if filters is None:
+        filters = {}
+
+    # Construction de la requête avec filtres dynamiques
+    query = """SELECT v.id, v.amount, v.description, v.reference_number, v.status, v.created_at,
+                      v.category_id,
+                      s.id as sender_id, s.first_name as sender_first, s.last_name as sender_last,
+                      r.id as receiver_id, r.first_name as receiver_first, r.last_name as receiver_last
+               FROM virements v
+               JOIN users s ON v.sender_id = s.id
+               JOIN users r ON v.receiver_id = r.id
+               WHERE """
+
+    params = []
+
+    # Filtre par type (envoyé ou reçu)
+    type_filter = filters.get('type')
+    if type_filter == 'sent':
+        query += "v.sender_id = %s"
+        params.append(user_id)
+    elif type_filter == 'received':
+        query += "v.receiver_id = %s"
+        params.append(user_id)
+    else:
+        query += "(v.sender_id = %s OR v.receiver_id = %s)"
+        params.extend([user_id, user_id])
+
+    # Filtre par date précise
+    if filters.get('date'):
+        query += " AND DATE(v.created_at) = %s"
+        params.append(filters['date'])
+
+    # Filtre par plage de dates
+    if filters.get('date_start'):
+        query += " AND DATE(v.created_at) >= %s"
+        params.append(filters['date_start'])
+    if filters.get('date_end'):
+        query += " AND DATE(v.created_at) <= %s"
+        params.append(filters['date_end'])
+
+    # Filtre par catégorie
+    if filters.get('category_id'):
+        query += " AND v.category_id = %s"
+        params.append(filters['category_id'])
+
+    # Tri par montant ou par date
+    sort = (filters.get('sort') or '').lower()
+    if sort == 'asc':
+        query += " ORDER BY v.amount ASC"
+    elif sort == 'desc':
+        query += " ORDER BY v.amount DESC"
+    else:
+        query += " ORDER BY v.created_at DESC"
+
     cursor = db.cursor(dictionary=True)
-    cursor.execute(
-        """SELECT v.id, v.amount, v.description, v.reference_number, v.status, v.created_at,
-                  s.id as sender_id, s.first_name as sender_first, s.last_name as sender_last,
-                  r.id as receiver_id, r.first_name as receiver_first, r.last_name as receiver_last
-           FROM virements v
-           JOIN users s ON v.sender_id = s.id
-           JOIN users r ON v.receiver_id = r.id
-           WHERE v.sender_id = %s OR v.receiver_id = %s
-           ORDER BY v.created_at DESC""",
-        (user_id, user_id)
-    )
+    cursor.execute(query, params)
     virements = cursor.fetchall()
     cursor.close()
     db.close()

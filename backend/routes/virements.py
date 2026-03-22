@@ -57,10 +57,24 @@ def send_virement():
 def get_virements():
     """
     Retourne l'historique des virements de l'utilisateur connecté.
-    Inclut les virements envoyés ET reçus.
+    Paramètres optionnels (query string) :
+    - date        : ex: ?date=2026-03-22
+    - date_start  : ex: ?date_start=2026-01-01
+    - date_end    : ex: ?date_end=2026-03-22
+    - category_id : ex: ?category_id=1
+    - type        : ex: ?type=sent ou ?type=received
+    - sort        : ex: ?sort=asc ou ?sort=desc (par montant)
     """
     user_id = get_jwt_identity()
-    virements = get_virements_by_user(user_id)
+    filters = {
+        'date':        request.args.get('date'),
+        'date_start':  request.args.get('date_start'),
+        'date_end':    request.args.get('date_end'),
+        'category_id': request.args.get('category_id'),
+        'type':        request.args.get('type'),
+        'sort':        request.args.get('sort'),
+    }
+    virements = get_virements_by_user(user_id, filters)
     return jsonify({"virements": virements}), 200
 
 
@@ -69,10 +83,18 @@ def get_virements():
 def get_transfers():
     """
     Alias de GET /virements pour compatibilité avec le frontend.
-    Retourne directement un tableau (format attendu par les hooks React).
+    Accepte les mêmes filtres en query string.
     """
     user_id = get_jwt_identity()
-    virements = get_virements_by_user(user_id)
+    filters = {
+        'date':        request.args.get('date'),
+        'date_start':  request.args.get('date_start'),
+        'date_end':    request.args.get('date_end'),
+        'category_id': request.args.get('category_id'),
+        'type':        request.args.get('type'),
+        'sort':        request.args.get('sort'),
+    }
+    virements = get_virements_by_user(user_id, filters)
     return jsonify(virements), 200
 
 
